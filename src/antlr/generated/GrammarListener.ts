@@ -11,6 +11,7 @@ import { BexpContext } from "./GrammarParser.js";
 import { DefnContext } from "./GrammarParser.js";
 import { ProgContext } from "./GrammarParser.js";
 import { BlockContext } from "./GrammarParser.js";
+import { ArgContext } from "./GrammarParser.js";
 
 
 /**
@@ -98,5 +99,15 @@ export default class GrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitBlock?: (ctx: BlockContext) => void;
+	/**
+	 * Enter a parse tree produced by `GrammarParser.arg`.
+	 * @param ctx the parse tree
+	 */
+	enterArg?: (ctx: ArgContext) => void;
+	/**
+	 * Exit a parse tree produced by `GrammarParser.arg`.
+	 * @param ctx the parse tree
+	 */
+	exitArg?: (ctx: ArgContext) => void;
 }
 

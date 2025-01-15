@@ -31,7 +31,7 @@ f
 bexp: exp (EQUAL_TO | NOT_EQUAL_TO | LESS_THAN | MORE_THAN | LESS_THAN_EQUAL | MORE_THAN_EQUAL) exp;
 
 defn
-    : DEF ID L_PAREN (ID COLON (INT | DOUBLE)) (COMMA ID COLON (INT | DOUBLE))* R_PAREN COLON (INT | DOUBLE | VOID) EQUAL exp
+    : DEF ID L_PAREN arg (COMMA arg)* R_PAREN COLON (INT | DOUBLE | VOID) EQUAL exp
     | DEF ID L_PAREN R_PAREN COLON (INT | DOUBLE | VOID) EQUAL exp
     | VAL (ID | GLOBAL_ID) COLON (INT | DOUBLE) EQUAL (NUMBER | DECIMAL_NUMBER)
     ;
@@ -41,12 +41,11 @@ prog
     : defn SEMI_COLON prog 
     | (exp)+
     | block
-    | exp
     ;
 
 block:         L_CURLY_PAREN prog R_CURLY_PAREN;
 
-
+arg: ID COLON (INT | DOUBLE);
 
 
 T_SKIP: 'skip';
