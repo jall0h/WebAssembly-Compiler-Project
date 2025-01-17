@@ -4,9 +4,9 @@ import GrammarVisitor from "./antlr/generated/GrammarVisitor";
 
 type Context = FContext | ExpContext | MContext | TContext | DefnContext 
 
-export class Compiler extends GrammarVisitor<String>{
+ export class Compiler extends GrammarVisitor<[String, Map<String,String>]>{
     public code_start: string = '(module \n (import "console" "log" (func $log (param i32))) \n'
-    public code_end: string = '(start $main) \n)'
+    public code_end: string = ')'
     private env: Map<string, number> = new Map<string,number>
     private typeConvert: Map<string,string> = new Map<string,string>([["Int","i32"], ["Double","f32"]])
 
@@ -66,80 +66,84 @@ export class Compiler extends GrammarVisitor<String>{
             if (ctx.m()) return this.getType(ctx.m(),ts)
         }
     }
-    visitProg(ctx: ProgContext, ts: Map<String,String>): String {
-        if (ctx.defn() && ctx.SEMI_COLON() && ctx.prog()){
-            return `${this.visit_node(ctx.defn(),ts)} ${this.visit_node(ctx.prog(),ts)}`
+     makeParams: (ctx: ArgContext[], env: Map<String,String>) => [String,Map<String,String>] = (ctx: ArgContext[], env: Map<String,String>)  => {
+        let p = "";
+        let t = env;
+        // console.log(t)
+        for (let i = 0; i < ctx.length; i++){
+            let [param,n_ts] = this.visit_node(ctx[i],t)
+            p += param
+            t = n_ts
         }
-        if (ctx.exp_list()) {
-            return "(func $main\n" +  ctx.exp_list().map((ctx) => this.visitExp(ctx,ts)).toString().replace(",","\n") + ")\n"
-        }
-       
+        // console.log(t)
+        return [p, t]
     }
-    visitBexp(ctx: BexpContext, ts?: Map<String, String>): String {
+
+    visitBexp(ctx: BexpContext, ts?: Map<String, String>): [String,Map<String,String>] {
         if(ctx.exp(0) && ctx.exp(1)){
-            const e1 = this.visit_node(ctx.exp(0),ts)
-            const e2 = this.visit_node(ctx.exp(1),ts)
+            const e1 = this.visit_node(ctx.exp(0),ts)[0]
+            const e2 = this.visit_node(ctx.exp(1),ts)[0]
             const t1 = this.getType(ctx.exp(0),ts)
             const t2 = this.getType(ctx.exp(1),ts)
             const sameType = t1 == t2
             if(sameType && t1 == "Int"){
-                if (ctx.EQUAL_TO()) return `${e1}${e2}i32.eq\n`
-                if (ctx.NOT_EQUAL_TO()) return `${e1}${e2}i32.ne\n`
-                if (ctx.LESS_THAN()) return `${e1}${e2}i32.lt_s\n`
-                if (ctx.LESS_THAN_EQUAL()) return `${e1}${e2}i32.le_s\n`
-                if (ctx.MORE_THAN()) return `${e1}${e2}i32.gt_s\n`
-                if (ctx.MORE_THAN_EQUAL()) return `${e1}${e2}i32.gt_e\n`
+                if (ctx.EQUAL_TO()) return [`${e1}${e2}i32.eq\n`,ts]
+                if (ctx.NOT_EQUAL_TO()) return [`${e1}${e2}i32.ne\n`,ts]
+                if (ctx.LESS_THAN()) return [`${e1}${e2}i32.lt_s\n`,ts]
+                if (ctx.LESS_THAN_EQUAL()) return [`${e1}${e2}i32.le_s\n`,ts]
+                if (ctx.MORE_THAN()) return [`${e1}${e2}i32.gt_s\n`,ts]
+                if (ctx.MORE_THAN_EQUAL()) return [`${e1}${e2}i32.gt_e\n`,ts]
             }
             if(sameType && t1 == "Double"){
-                if (ctx.EQUAL_TO()) return `${e1}${e2}f32.eq\n`
-                if (ctx.NOT_EQUAL_TO()) return `${e1}${e2}f32.ne\n`
-                if (ctx.LESS_THAN()) return `${e1}${e2}f32.lt\n`
-                if (ctx.LESS_THAN_EQUAL()) return `${e1}${e2}f32.le\n`
-                if (ctx.MORE_THAN()) return `${e1}${e2}f32.gt\n`
-                if (ctx.MORE_THAN_EQUAL()) return `${e1}${e2}f32.gt\n`
+                if (ctx.EQUAL_TO()) return [`${e1}${e2}f32.eq\n`,ts]
+                if (ctx.NOT_EQUAL_TO()) return [`${e1}${e2}f32.ne\n`,ts]
+                if (ctx.LESS_THAN()) return [`${e1}${e2}f32.lt\n`,ts]
+                if (ctx.LESS_THAN_EQUAL()) return [`${e1}${e2}f32.le\n`,ts]
+                if (ctx.MORE_THAN()) return [`${e1}${e2}f32.gt\n`,ts]
+                if (ctx.MORE_THAN_EQUAL()) return [`${e1}${e2}f32.gt\n`,ts]
             }
             else throw new Error("Boolean expression has two different types")
         }
     }
-    visitExp(ctx: ExpContext, ts: Map<String,String>): String {
-       if (ctx.T_SKIP() && ctx.L_PAREN() && ctx.R_PAREN()) return `call $skip\n`
-       if (ctx.T_SKIP()) return `call $skip\n`
+    visitExp(ctx: ExpContext, ts: Map<String,String>): [String,Map<String,String>] {
+       if (ctx.T_SKIP() && ctx.L_PAREN() && ctx.R_PAREN()) return [`call $skip\n`,ts]
+       if (ctx.T_SKIP()) return [`call $skip\n`,ts]
        if (ctx.IF() && ctx.bexp() && ctx.THEN() && ctx.exp(0) && ctx.ELSE() && ctx.exp(1)){
             const t1 = this.getType(ctx.exp(0),ts)
             const t2 = this.getType(ctx.exp(1),ts)
             if (t1 == t2){
-                if (t1 == "Int") return  this.visit_node(ctx.bexp(),ts) + `(if (result i32)\n (then\n ${this.visit_node(ctx.exp(0),ts)}) (else\n ${this.visit_node(ctx.exp(1),ts)})\n)\n`
-                if (t1 == "Double") return this.visit_node(ctx.bexp(),ts) + `(if result f32)\n (then\n ${this.visit_node(ctx.exp(0),ts)}) (else\n ${this.visit_node(ctx.exp(1),ts)})\n)\n`
+                if (t1 == "Int") return  [this.visit_node(ctx.bexp(),ts)[0] + `(if (result i32)\n (then\n ${this.visit_node(ctx.exp(0),ts)[0]}) (else\n ${this.visit_node(ctx.exp(1),ts)[0]})\n)\n`,ts]
+                if (t1 == "Double") return [this.visit_node(ctx.bexp(),ts)[0] + `(if result f32)\n (then\n ${this.visit_node(ctx.exp(0),ts)[0]}) (else\n ${this.visit_node(ctx.exp(1),ts)[0]})\n)\n`,ts]
             }
        }
        if (ctx.m() && ctx.SEMI_COLON() && ctx.exp(0)){
-            return `${this.visit_node(ctx.m(),ts)}${this.visit_node(ctx.exp(0),ts)}`
+            return [`${this.visit_node(ctx.m(),ts)[0]}${this.visit_node(ctx.exp(0),ts)[0]}`,ts]
        }
        if (ctx.m()){
             return this.visit_node(ctx.m(),ts)
        }
     }
 
-    visitM(ctx: MContext, ts: Map<String,String>): String {
+    visitM(ctx: MContext, ts: Map<String,String>): [String,Map<String,String>] {
         if (ctx.t() && ctx.exp()){
             const t1 = this.getType(ctx.t(),ts)
             const t2 = this.getType(ctx.exp(),ts)
-            console.log(t1,t2)
+            // console.log(t1,t2)
             if (t1 == t2){
                 if (t1 == "Int"){
                     if (ctx.ADD()){
-                    return `${this.visit_node(ctx.t(),ts)} ${this.visit_node(ctx.exp(),ts)} i32.add\n`
+                    return [`${this.visit_node(ctx.t(),ts)[0]} ${this.visit_node(ctx.exp(),ts)[0]} i32.add\n`, ts]
                     }
                     if (ctx.SUB()){
-                        return `${this.visit_node(ctx.t(),ts)} ${this.visit_node(ctx.exp(),ts)} i32.sub\n`
+                        return [`${this.visit_node(ctx.t(),ts)[0]} ${this.visit_node(ctx.exp(),ts)[0]} i32.sub\n`,ts]
                     }
                 }
                 if (t1 == "Double"){
                     if (ctx.ADD()){
-                        return `${this.visit_node(ctx.t(),ts)} ${this.visit_node(ctx.exp(),ts)} f32.add\n`
+                        return [`${this.visit_node(ctx.t(),ts)[0]} ${this.visit_node(ctx.exp(),ts[0])} f32.add\n`,ts]
                         }
                     if (ctx.SUB()){
-                        return `${this.visit_node(ctx.t(),ts)} ${this.visit_node(ctx.exp(),ts)} f32.sub\n`
+                        return [`${this.visit_node(ctx.t(),ts)[0]} ${this.visit_node(ctx.exp(),ts)[0]} f32.sub\n`,ts]
                     }
                 }
             }
@@ -148,31 +152,31 @@ export class Compiler extends GrammarVisitor<String>{
             return this.visit_node(ctx.t(),ts)
         }
     }
-    visitT(ctx: TContext, ts: Map<String,String>): String {
+    visitT(ctx: TContext, ts: Map<String,String>): [String,Map<String,String>] {
         if (ctx.f() && ctx.t()) {
             const t1 = this.getType(ctx.f(),ts)
             const t2 = this.getType(ctx.t(),ts)
             if (t1 == t2) {
                 if (t1 == "Int"){
                     if (ctx.MULT()){
-                        return `${this.visit_node(ctx.f(),ts)}${this.visit_node(ctx.t(),ts)}i32.mul\n`
+                        return [`${this.visit_node(ctx.f(),ts)[0]}${this.visit_node(ctx.t(),ts)[0]}i32.mul\n`,ts]
                     }
                     if (ctx.DIV()){
-                        return `${this.visit_node(ctx.f(),ts)}${this.visit_node(ctx.t(),ts)}i32.div_s\n`
+                        return [`${this.visit_node(ctx.f(),ts)[0]}${this.visit_node(ctx.t(),ts)[0]}i32.div_s\n`,ts]
                     }
                     if (ctx.MOD()){
-                        return `${this.visit_node(ctx.f(),ts)}${this.visit_node(ctx.t(),ts)}i32.rem_s\n`
+                        return [`${this.visit_node(ctx.f(),ts)[0]}${this.visit_node(ctx.t(),ts)[0]}i32.rem_s\n`,ts]
                     }
                 }
                 if (t1 == "Double"){
                     if (ctx.MULT()){
-                        return `${this.visit_node(ctx.f(),ts)}${this.visit_node(ctx.t(),ts)}f32.mul\n`
+                        return [`${this.visit_node(ctx.f(),ts)[0]}${this.visit_node(ctx.t(),ts)[0]}f32.mul\n`,ts]
                     }
                     if (ctx.DIV()){
-                        return `${this.visit_node(ctx.f(),ts)}${this.visit_node(ctx.t(),ts)}f32.div_s\n`
+                        return [`${this.visit_node(ctx.f(),ts)[0]}${this.visit_node(ctx.t(),ts)[0]}f32.div_s\n`,ts]
                     }
                     if (ctx.MOD()){
-                        return `${this.visit_node(ctx.f(),ts)}${this.visit_node(ctx.t(),ts)}f32.rem_s\n`
+                        return [`${this.visit_node(ctx.f(),ts)[0]}${this.visit_node(ctx.t(),ts)[0]}f32.rem_s\n`,ts]
                     }
                 }
             }
@@ -183,92 +187,115 @@ export class Compiler extends GrammarVisitor<String>{
         }
     }
     
-    visitF(ctx: FContext, ts: Map<String,String>): String {
+    visitF(ctx: FContext, ts: Map<String,String>): [String, Map<String,String>] {
         if (ctx.ID() && ctx.L_PAREN() && ctx.exp_list() && ctx.R_PAREN){
-            return `${ctx.exp_list().map((ctx) => this.visitExp(ctx,ts)).toString().replace(",","")} call $${ctx.ID().getText()}\n`
+            return [`${ctx.exp_list().map((ctx) => this.visitExp(ctx,ts)[0]).toString().replace(",","")} call $${ctx.ID().getText()}\n`,ts]
         }
         if (ctx.ID() && ctx.L_PAREN() && ctx.R_PAREN){
-            return `call ${ctx.ID().getText()}`
+            return [`call ${ctx.ID().getText()}`,ts]
         }
         if (ctx.L_PAREN() && ctx.exp(0) && ctx.R_PAREN()){
-            return "\t( " + this.visit_node(ctx.exp(0),ts) + "\t)\n"
+            return ["\t( " + this.visit_node(ctx.exp(0),ts)[0] + "\t)\n",ts]
         }
         if (ctx.L_CURLY_PAREN() && ctx.exp(0) && ctx.R_CURLY_PAREN()){
-            return "\t( " + this.visit_node(ctx.exp(0),ts) + "\t)\n"
+            return ["\t( " + this.visit_node(ctx.exp(0),ts)[0] + "\t)\n", ts]
         }
         if (ctx.ID()){
-            return `local.get $${ctx.ID().getText()}\n`
+            return [`local.get $${ctx.ID().getText()}\n`,ts]
         }
         if (ctx.GLOBAL_ID()){
-            return `global.get $${ctx.GLOBAL_ID().getText()}\n`
+            return [`global.get $${ctx.GLOBAL_ID().getText()}\n`,ts]
         }
         if (ctx.SUB() && ctx.DECIMAL_NUMBER())
         {
-            return `f32.const ${ctx.DECIMAL_NUMBER().getText()}\nf32.neg\n` 
+            return [`f32.const ${ctx.DECIMAL_NUMBER().getText()}\nf32.neg\n` ,ts]
         }
         if (ctx.ADD() && ctx.DECIMAL_NUMBER() || ctx.DECIMAL_NUMBER())
         {
-                return `f32.const ${ctx.DECIMAL_NUMBER().getText()}\n` 
+                return [`f32.const ${ctx.DECIMAL_NUMBER().getText()}\n`, ts ]
         }
         if (ctx.SUB() && ctx.NUMBER())
         {
-            return `i32.const ${ctx.NUMBER().getText()}\ni32.neg\n` 
+            return [`i32.const ${ctx.NUMBER().getText()}\ni32.neg\n`, ts]
         }
         if (ctx.ADD() && ctx.NUMBER() || ctx.NUMBER())
         {
-            return `i32.const ${ctx.NUMBER().getText()} \n`
+            return [`i32.const ${ctx.NUMBER().getText()} \n`, ts]
         }
     }
-
-    visitDefn(ctx: DefnContext, ts?: Map<String, String>): String {
+    
+    visitDefn(ctx: DefnContext, ts?: Map<String, String>): [String,Map<String,String>] {
         //TODO: ADD TYPING IN GRAMMAR TO TYPES AND ADD TO IF
         //TODO: REMOVE REDUNDANT CODE
         if(ctx.VAL() && ctx.GLOBAL_ID() && ctx.COLON() && ctx.INT() && ctx.EQUAL() && ctx.NUMBER()){
-            return `(global $${ctx.GLOBAL_ID().getText()} i32 (i32.const ${ctx.NUMBER().getText()}))\n`
+            const new_ts = new Map<String,String>([...ts, [ctx.GLOBAL_ID().getText(), "Int"]])
+            return [`(global $${ctx.GLOBAL_ID().getText()} i32 (i32.const ${ctx.NUMBER().getText()}))\n`, new_ts]
         }
         if(ctx.VAL() && ctx.GLOBAL_ID() && ctx.COLON() && ctx.DOUBLE() && ctx.EQUAL() && ctx.DECIMAL_NUMBER()){
-            return `(global $${ctx.GLOBAL_ID().getText()} f32 (f32.const ${ctx.DECIMAL_NUMBER().getText()}))\n`
+            const new_ts = new Map<String,String>([...ts, [ctx.GLOBAL_ID().getText(), "Double"]])
+            return [`(global $${ctx.GLOBAL_ID().getText()} f32 (f32.const ${ctx.DECIMAL_NUMBER().getText()}))\n`, new_ts]
        }
         //TODO: ENSURE GRAMMAR DIFFERENTIATES BETWEEN GLOBAL/LOCAL and TYPES, ADD TYPING ENV CHANGE
         if(ctx.VAL() && ctx.ID() && ctx.COLON() && ctx.INT() && ctx.EQUAL() && ctx.NUMBER()){
-          return `(local $${ctx.ID().getText()} i32)\n(local.set $${ctx.ID().getText()} (i32.const ${ctx.NUMBER().getText()}))\n`
+          const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(), "Int"]])
+          return [`(local $${ctx.ID().getText()} i32)\n(local.set $${ctx.ID().getText()} (i32.const ${ctx.NUMBER().getText()}))\n`, new_ts]
         }
         if(ctx.VAL() && ctx.ID() && ctx.COLON() && ctx.DOUBLE() && ctx.EQUAL() && ctx.DECIMAL_NUMBER()){
-             return `(local $${ctx.ID().getText()} f32)\n(local.set $${ctx.ID().getText()} (f32.const ${ctx.DECIMAL_NUMBER().getText()}))\n`
+             const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(), "Double"]])
+             return [`(local $${ctx.ID().getText()} f32)\n(local.set $${ctx.ID().getText()} (f32.const ${ctx.DECIMAL_NUMBER().getText()}))\n`, new_ts]
         }
         if (ctx.DEF()  && ctx.L_PAREN() && ctx.ID() && ctx.arg_list() && ctx.COLON && ctx.EQUAL() && ctx.exp() && ctx.DOUBLE()){
-            const new_ts = ts.set(ctx.ID().getText(), ctx.DOUBLE().getText())
-            return `(func $${ctx.ID()} ${ctx.arg_list().map((ctx) => this.visit_node(ctx,ts)).toString().replace(","," ")} (result f32)\n ${this.visit_node(ctx.exp(), new_ts)})\n`
+            const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(), "Int"]])
+            const [params, u_ts] = this.makeParams(ctx.arg_list(),new_ts)
+            return [`(func $${ctx.ID()} ${params} (result f32)\n ${this.visit_node(ctx.exp(), u_ts)[0]})\n`,u_ts]
         }
         if (ctx.DEF()  && ctx.L_PAREN() && ctx.ID() && ctx.arg_list() && ctx.COLON && ctx.EQUAL() && ctx.exp() && ctx.VOID()){
-            const new_ts = ts.set(ctx.ID().getText(), ctx.VOID().getText())
-            return `(func $${ctx.ID()} ${ctx.arg_list().map((ctx) => this.visit_node(ctx,ts)).toString().replace(","," ")} (result  )\n ${this.visit_node(ctx.exp(), new_ts)})\n`
+            const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(), "Void"]])
+            const [params, u_ts] = this.makeParams(ctx.arg_list(),new_ts)
+            return [`(func $${ctx.ID()} ${params} (result  )\n ${this.visit_node(ctx.exp(), u_ts)[0]})\n`, u_ts]
         }
         if (ctx.DEF()  && ctx.L_PAREN() && ctx.ID() && ctx.arg_list() && ctx.COLON && ctx.EQUAL() && ctx.exp() && ctx.INT()){
-            const new_ts = ts.set(ctx.ID().getText(), ctx.INT().getText())
-            return `(func $${ctx.ID()} ${ctx.arg_list().map((ctx) => this.visit_node(ctx,ts)).toString().replace(","," ")} (result i32)\n ${this.visit_node(ctx.exp(), new_ts)})\n`
+            const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(), "Int"]])
+            const [params, u_ts] = this.makeParams(ctx.arg_list(),new_ts)
+            return [`(func $${ctx.ID()} ${params} (result i32)\n ${this.visit_node(ctx.exp(), u_ts)[0]})\n`, u_ts]
         }
         if (ctx.DEF()  && ctx.L_PAREN() && ctx.ID() && ctx.R_PAREN()  && ctx.COLON && ctx.EQUAL() && ctx.exp() && ctx.INT()){
-            const new_ts = ts.set(ctx.ID().getText(), "Int")
-            return `(func $${ctx.ID().getText()} (result i32)\n ${this.visit_node(ctx.exp(), new_ts)})\n`
+            const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(), "Int"]])
+            return [`(func $${ctx.ID().getText()} (result i32)\n ${this.visit_node(ctx.exp(), new_ts)[0]})\n`, new_ts]
         }
         if (ctx.DEF()  && ctx.L_PAREN() && ctx.ID() && ctx.R_PAREN()  && ctx.COLON && ctx.EQUAL() && ctx.exp() && ctx.DOUBLE()){
-            const new_ts = ts.set(ctx.ID().getText(), "Double")
-            return `(func $${ctx.ID().getText()} (result f32)\n ${this.visit_node(ctx.exp(), new_ts)})\n`
+            const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(), "Double"]])
+            return [`(func $${ctx.ID().getText()} (result f32)\n ${this.visit_node(ctx.exp(), new_ts)[0]})\n`, new_ts]
         }
         if (ctx.DEF()  && ctx.L_PAREN() && ctx.ID() && ctx.R_PAREN()  && ctx.COLON && ctx.EQUAL() && ctx.exp() && ctx.VOID()){
-            const new_ts = ts.set(ctx.ID().getText(), "Double")
-            return `(func $${ctx.ID().getText()} (result  )\n ${this.visit_node(ctx.exp(), new_ts)})\n`
+            const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(), "Void"]])
+            return [`(func $${ctx.ID().getText()} (result  )\n ${this.visit_node(ctx.exp(), new_ts)[0]})\n`,new_ts]
         }
     }
 
-    visitArg(ctx: ArgContext, ts?: Map<String, String>): String {
-        console.log("here visited")
+    visitArg(ctx: ArgContext, ts?: Map<String, String>): [String, Map<String,String>] {
+        // console.log("here visited")
         if (ctx.ID() && ctx.COLON() && ctx.INT()){
-            return `(param $${ctx.ID().getText()} i32) `
+            const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(),"Int"]])
+            return [`(param $${ctx.ID().getText()} i32) `, new_ts]
         }
         if (ctx.ID() && ctx.COLON() && ctx.DOUBLE()){
-            return `(param $${ctx.ID().getText()} f32) `
+            const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(),"Int"]])
+            return [`(param $${ctx.ID().getText()} f32)`, new_ts]
         }
+    }
+
+    visitProg(ctx: ProgContext, ts: Map<String,String>): [String, Map<String,String>] {
+        if (ctx.defn() && ctx.SEMI_COLON() && ctx.prog()){
+            const [code, new_ts] = this.visit_node(ctx.defn(),ts)
+            return [`${code} ${this.visit_node(ctx.prog(),new_ts)[0]}`, new_ts]
+        }
+        if (ctx.exp_list()) {
+            // TODO: ADD expression parser for env updating
+            return ["(func (export \"main\") (result i32)\n" +  ctx.exp_list().map((ctx) => this.visitExp(ctx,ts)[0]).toString().replace(",","\n") + "i32.const 0\nreturn)\n", ts]
+        }
+       if (ctx.block()){
+            return [`(${this.visit_node(ctx.block(), ts)[0]})`,ts]
+       }
     }
 }
