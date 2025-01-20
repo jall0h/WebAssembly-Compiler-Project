@@ -65,6 +65,9 @@ type Context = FContext | ExpContext | MContext | TContext | DefnContext
                 console.log(t1)
                 return t1
             }
+            if (ctx.T_SKIP() || ctx.T_SKIP() && ctx.L_PAREN() && ctx.R_PAREN()){
+                return "Void"
+            }
             if (ctx.m()) return this.getType(ctx.m(),ts)
         }
     }
@@ -108,8 +111,8 @@ type Context = FContext | ExpContext | MContext | TContext | DefnContext
         }
     }
     visitExp(ctx: ExpContext, ts: Map<String,String>): [String,Map<String,String>] {
-       if (ctx.T_SKIP() && ctx.L_PAREN() && ctx.R_PAREN()) return [`call $skip\n`,ts]
-       if (ctx.T_SKIP()) return [`call $skip\n`,ts]
+       if (ctx.T_SKIP() && ctx.L_PAREN() && ctx.R_PAREN()) return [`nop\n`,ts]
+       if (ctx.T_SKIP()) return [`nop\n`,ts]
        if (ctx.IF() && ctx.bexp() && ctx.THEN() && ctx.exp(0) && ctx.ELSE() && ctx.exp(1)){
             const t1 = this.getType(ctx.exp(0),ts)
             const t2 = this.getType(ctx.exp(1),ts)
