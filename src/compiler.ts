@@ -12,11 +12,14 @@ type Context = FContext | ExpContext | MContext | TContext | DefnContext
 
     getType(ctx: Context, ts: Map<String,String>): String {
        if (ctx instanceof FContext) {
-        if (ctx.L_PAREN() && ctx.exp(0) && ctx.R_PAREN() || ctx.L_CURLY_PAREN() && ctx.exp(0) && ctx.R_CURLY_PAREN()){
-            return this.getType(ctx.exp(0),ts)
+        if (ctx.L_CURLY_PAREN() && ctx.exp(0) && ctx.R_CURLY_PAREN()){
+            return this.getType(ctx.exp(0), ts)
         }
         if (ctx.ID() && ctx.L_PAREN() && ctx.exp_list() && ctx.R_PAREN || ctx.ID() && ctx.L_PAREN() && ctx.R_PAREN || ctx.ID()){
             return ts.get(ctx.ID().getText())
+        }
+        if (ctx.L_PAREN() && ctx.exp(0) && ctx.R_PAREN() ){
+            return this.getType(ctx.exp(0),ts)
         }
         if (ctx.GLOBAL_ID()){
             return ts.get(ctx.GLOBAL_ID().getText())
@@ -59,9 +62,8 @@ type Context = FContext | ExpContext | MContext | TContext | DefnContext
             }
             if (ctx.m() && ctx.SEMI_COLON() && ctx.exp(0)){
                 const t1 = this.getType(ctx.exp(0),ts)
-                const t2 = this.getType(ctx.m(), ts)
-                if (t1 === t2) return t1
-                else throw new Error("Incorrect Types")
+                console.log(t1)
+                return t1
             }
             if (ctx.m()) return this.getType(ctx.m(),ts)
         }
@@ -102,7 +104,7 @@ type Context = FContext | ExpContext | MContext | TContext | DefnContext
                 if (ctx.MORE_THAN()) return [`${e1}${e2}f32.gt\n`,ts]
                 if (ctx.MORE_THAN_EQUAL()) return [`${e1}${e2}f32.gt\n`,ts]
             }
-            else throw new Error("Boolean expression has two different types")
+            else throw new Error(`Boolean expression has two different types:${ts.entries}`)
         }
     }
     visitExp(ctx: ExpContext, ts: Map<String,String>): [String,Map<String,String>] {
@@ -111,9 +113,12 @@ type Context = FContext | ExpContext | MContext | TContext | DefnContext
        if (ctx.IF() && ctx.bexp() && ctx.THEN() && ctx.exp(0) && ctx.ELSE() && ctx.exp(1)){
             const t1 = this.getType(ctx.exp(0),ts)
             const t2 = this.getType(ctx.exp(1),ts)
+            console.log("type1",this.visit_node(ctx.bexp(),ts))
+            console.log("type2",t2)
             if (t1 == t2){
                 if (t1 == "Int") return  [this.visit_node(ctx.bexp(),ts)[0] + `(if (result i32)\n (then\n ${this.visit_node(ctx.exp(0),ts)[0]}) (else\n ${this.visit_node(ctx.exp(1),ts)[0]})\n)\n`,ts]
-                if (t1 == "Double") return [this.visit_node(ctx.bexp(),ts)[0] + `(if result f32)\n (then\n ${this.visit_node(ctx.exp(0),ts)[0]}) (else\n ${this.visit_node(ctx.exp(1),ts)[0]})\n)\n`,ts]
+                if (t1 == "Double") return [this.visit_node(ctx.bexp(),ts)[0] + `(if (result f32)\n (then\n ${this.visit_node(ctx.exp(0),ts)[0]}) (else\n ${this.visit_node(ctx.exp(1),ts)[0]})\n)\n`,ts]
+                if (t1 == "Void") return [this.visit_node(ctx.bexp(),ts)[0] + `(if (result )\n (then\n ${this.visit_node(ctx.exp(0),ts)[0]}) (else\n ${this.visit_node(ctx.exp(1),ts)[0]})\n)\n`,ts]
             }
        }
        if (ctx.m() && ctx.SEMI_COLON() && ctx.exp(0)){
@@ -195,10 +200,12 @@ type Context = FContext | ExpContext | MContext | TContext | DefnContext
             return [`call ${ctx.ID().getText()}`,ts]
         }
         if (ctx.L_PAREN() && ctx.exp(0) && ctx.R_PAREN()){
-            return ["\t( " + this.visit_node(ctx.exp(0),ts)[0] + "\t)\n",ts]
+            console.log(this.visit_node(ctx.exp(0),ts))
+            return [ this.visit_node(ctx.exp(0),ts)[0] + "\n",ts]
         }
         if (ctx.L_CURLY_PAREN() && ctx.exp(0) && ctx.R_CURLY_PAREN()){
-            return ["\t( " + this.visit_node(ctx.exp(0),ts)[0] + "\t)\n", ts]
+            console.log(this.visit_node(ctx.exp(0),ts))
+            return ["" + this.visit_node(ctx.exp(0),ts)[0] + "\n", ts]
         }
         if (ctx.ID()){
             return [`local.get $${ctx.ID().getText()}\n`,ts]
@@ -292,7 +299,9 @@ type Context = FContext | ExpContext | MContext | TContext | DefnContext
         }
         if (ctx.exp_list()) {
             // TODO: ADD expression parser for env updating
-            return ["(func (export \"main\") (result i32)\n" +  ctx.exp_list().map((ctx) => this.visitExp(ctx,ts)[0]).toString().replace(",","\n") + "i32.const 0\nreturn)\n", ts]
+            console.log(this.visit_node(ctx.exp(0),ts))
+            console.log(this.visit_node(ctx.exp(1),ts))
+            return ["(func (export \"main\") (result i32)\n" +  ctx.exp_list().map((ctx) => this.visit_node(ctx,ts)[0]).toString().replace(",","\n") + "i32.const 0\nreturn)\n", ts]
         }
        if (ctx.block()){
             return [`(${this.visit_node(ctx.block(), ts)[0]})`,ts]
