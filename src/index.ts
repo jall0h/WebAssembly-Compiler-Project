@@ -23,7 +23,9 @@ const listener = new Compiler()
 const f = new Map<String,String>()
 f.set("log","Void")
 f.set("skip","Void")
-const code = listener.code_start + listener.visit_node(tree,f)[0] + listener.code_end
+f.set("print_string", "Void")
+const body = listener.visit_node(tree,f)[0]
+const code = listener.code_start + body + listener.code_end
 fs.writeFile(`./src/wat/${file}.wat`,code, (err) => {console.log(err)})
 
 // execute(file)

@@ -161,3 +161,12 @@ dist
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/node,visualstudiocode
+src/examples.zip
+src/wasm/fact.wasm
+src/wasm/fib.wasm
+src/wasm/mand.wasm
+src/wasm/sqr.wasm
+src/wat/fact.wat
+src/wat/fib.wat
+src/wat/mand.wat
+src/wat/sqr.wat

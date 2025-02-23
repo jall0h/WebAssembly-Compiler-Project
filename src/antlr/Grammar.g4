@@ -26,14 +26,15 @@ f
     | ADD DECIMAL_NUMBER
     | NUMBER
     | DECIMAL_NUMBER
+    | STRING
     ;
 
 bexp: exp (EQUAL_TO | NOT_EQUAL_TO | LESS_THAN | MORE_THAN | LESS_THAN_EQUAL | MORE_THAN_EQUAL) exp;
 
 defn
-    : DEF ID L_PAREN arg (COMMA arg)* R_PAREN COLON (INT | DOUBLE | VOID) EQUAL exp
-    | DEF ID L_PAREN R_PAREN COLON (INT | DOUBLE | VOID) EQUAL exp
-    | VAL (ID | GLOBAL_ID) COLON (INT | DOUBLE) EQUAL (NUMBER | DECIMAL_NUMBER)
+    : DEF ID L_PAREN arg (COMMA arg)* R_PAREN COLON (INT | DOUBLE | STRING_TYPE | VOID) EQUAL exp
+    | DEF ID L_PAREN R_PAREN COLON (INT | DOUBLE | STRING_TYPE | VOID) EQUAL exp
+    | VAL (ID | GLOBAL_ID) COLON (INT | DOUBLE | STRING_TYPE) EQUAL (NUMBER | DECIMAL_NUMBER | SUB DECIMAL_NUMBER | SUB NUMBER | STRING)
     ;
 
 
@@ -45,7 +46,7 @@ prog
 
 block:         L_CURLY_PAREN prog R_CURLY_PAREN;
 
-arg: ID COLON (INT | DOUBLE);
+arg: ID COLON (INT | DOUBLE | STRING_TYPE);
 
 
 T_SKIP: 'skip';
@@ -60,11 +61,13 @@ DEF: 'def' ;
 VAL: 'val';
 INT: 'Int';
 DOUBLE: 'Double';
+STRING_TYPE: 'String';
 VOID: 'Void';
 NUMBER:         [1-9][0-9]* | [0];
 DECIMAL_NUMBER: [0-9]+ '.' [0-9]+ ;
 ID:             [a-z] ([a-zA-Z] | NUMBER | '_')*;
 GLOBAL_ID:      [A-Z] ([a-zA-Z] | NUMBER | '_')*;
+STRING: '"' (~["])* '"';
 ADD:            '+';
 SUB:            '-';
 MULT:           '*';

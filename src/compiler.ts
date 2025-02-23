@@ -3,12 +3,14 @@ import GrammarParser, { ArgContext, BexpContext, DefnContext, ExpContext, FConte
 import GrammarVisitor from "./antlr/generated/GrammarVisitor";
 
 type Context = FContext | ExpContext | MContext | TContext | DefnContext 
+type str_val = {offset: number; length: number}
 
  export class Compiler extends GrammarVisitor<[String, Map<String,String>]>{
-    public code_start: string = '(module \n (import "console" "log" (func $log (param i32))) \n'
+    public code_start: string = '(module \n (import "console" "log" (func $log (param i32)))\n(import "process" "print_string" (func $print_string (param i32 i32)))\n(import "js" "mem" (memory 1))\n'
     public code_end: string = ')'
-    private env: Map<string, number> = new Map<string,number>
+    private string_env: Map<string, str_val> = new Map<string,str_val>
     private typeConvert: Map<string,string> = new Map<string,string>([["Int","i32"], ["Double","f32"]])
+    private counter: number = 0;
 
     getType(ctx: Context, ts: Map<String,String>): String {
        if (ctx instanceof FContext) {
@@ -26,11 +28,14 @@ type Context = FContext | ExpContext | MContext | TContext | DefnContext
         }
         if (ctx.SUB() && ctx.DECIMAL_NUMBER() || ctx.ADD() && ctx.DECIMAL_NUMBER() || ctx.DECIMAL_NUMBER())
         {
-                return "Double"
+            return "Double"
         }
         if (ctx.SUB() && ctx.NUMBER() || ctx.ADD() && ctx.NUMBER() || ctx.NUMBER())
         {
             return "Int"
+        }
+        if (ctx.STRING()){
+            return "String"
         }
        }
        if (ctx instanceof MContext) {
@@ -55,6 +60,7 @@ type Context = FContext | ExpContext | MContext | TContext | DefnContext
         }
         if (ctx instanceof ExpContext){
             if (ctx.IF() && ctx.bexp() && ctx.THEN() && ctx.exp(0) && ctx.ELSE() && ctx.exp(1)) {
+                ctx.exp_list().map((exp) => console.log(exp.getText()))
                 const t1 = this.getType(ctx.exp(0), ts)
                 const t2 = this.getType(ctx.exp(1), ts)
                 if (t1 === t2) return t1
@@ -62,7 +68,6 @@ type Context = FContext | ExpContext | MContext | TContext | DefnContext
             }
             if (ctx.m() && ctx.SEMI_COLON() && ctx.exp(0)){
                 const t1 = this.getType(ctx.exp(0),ts)
-                console.log(t1)
                 return t1
             }
             if (ctx.T_SKIP() || ctx.T_SKIP() && ctx.L_PAREN() && ctx.R_PAREN()){
@@ -74,17 +79,15 @@ type Context = FContext | ExpContext | MContext | TContext | DefnContext
      makeParams: (ctx: ArgContext[], env: Map<String,String>) => [String,Map<String,String>] = (ctx: ArgContext[], env: Map<String,String>)  => {
         let p = "";
         let t = env;
-        // console.log(t)
         for (let i = 0; i < ctx.length; i++){
             let [param,n_ts] = this.visit_node(ctx[i],t)
             p += param
             t = n_ts
         }
-        // console.log(t)
         return [p, t]
     }
 
-    visitBexp(ctx: BexpContext, ts?: Map<String, String>): [String,Map<String,String>] {
+    visitBexp(ctx: BexpContext, ts: Map<String, String>): [String,Map<String,String>] {
         if(ctx.exp(0) && ctx.exp(1)){
             const e1 = this.visit_node(ctx.exp(0),ts)[0]
             const e2 = this.visit_node(ctx.exp(1),ts)[0]
@@ -105,7 +108,7 @@ type Context = FContext | ExpContext | MContext | TContext | DefnContext
                 if (ctx.LESS_THAN()) return [`${e1}${e2}f32.lt\n`,ts]
                 if (ctx.LESS_THAN_EQUAL()) return [`${e1}${e2}f32.le\n`,ts]
                 if (ctx.MORE_THAN()) return [`${e1}${e2}f32.gt\n`,ts]
-                if (ctx.MORE_THAN_EQUAL()) return [`${e1}${e2}f32.gt\n`,ts]
+                if (ctx.MORE_THAN_EQUAL()) return [`${e1}${e2}f32.ge\n`,ts]
             }
             else throw new Error(`Boolean expression has two different types:${ts.entries}`)
         }
@@ -116,8 +119,6 @@ type Context = FContext | ExpContext | MContext | TContext | DefnContext
        if (ctx.IF() && ctx.bexp() && ctx.THEN() && ctx.exp(0) && ctx.ELSE() && ctx.exp(1)){
             const t1 = this.getType(ctx.exp(0),ts)
             const t2 = this.getType(ctx.exp(1),ts)
-            console.log("type1",this.visit_node(ctx.bexp(),ts))
-            console.log("type2",t2)
             if (t1 == t2){
                 if (t1 == "Int") return  [this.visit_node(ctx.bexp(),ts)[0] + `(if (result i32)\n (then\n ${this.visit_node(ctx.exp(0),ts)[0]}) (else\n ${this.visit_node(ctx.exp(1),ts)[0]})\n)\n`,ts]
                 if (t1 == "Double") return [this.visit_node(ctx.bexp(),ts)[0] + `(if (result f32)\n (then\n ${this.visit_node(ctx.exp(0),ts)[0]}) (else\n ${this.visit_node(ctx.exp(1),ts)[0]})\n)\n`,ts]
@@ -136,7 +137,6 @@ type Context = FContext | ExpContext | MContext | TContext | DefnContext
         if (ctx.t() && ctx.exp()){
             const t1 = this.getType(ctx.t(),ts)
             const t2 = this.getType(ctx.exp(),ts)
-            // console.log(t1,t2)
             if (t1 == t2){
                 if (t1 == "Int"){
                     if (ctx.ADD()){
@@ -147,8 +147,9 @@ type Context = FContext | ExpContext | MContext | TContext | DefnContext
                     }
                 }
                 if (t1 == "Double"){
+                    console.log("Hello")
                     if (ctx.ADD()){
-                        return [`${this.visit_node(ctx.t(),ts)[0]} ${this.visit_node(ctx.exp(),ts[0])} f32.add\n`,ts]
+                        return [`${this.visit_node(ctx.t(),ts)[0]} ${this.visit_node(ctx.exp(),ts)[0]} f32.add\n`,ts]
                         }
                     if (ctx.SUB()){
                         return [`${this.visit_node(ctx.t(),ts)[0]} ${this.visit_node(ctx.exp(),ts)[0]} f32.sub\n`,ts]
@@ -197,20 +198,24 @@ type Context = FContext | ExpContext | MContext | TContext | DefnContext
     
     visitF(ctx: FContext, ts: Map<String,String>): [String, Map<String,String>] {
         if (ctx.ID() && ctx.L_PAREN() && ctx.exp_list() && ctx.R_PAREN){
-            return [`${ctx.exp_list().map((ctx) => this.visitExp(ctx,ts)[0]).toString().replace(",","")} call $${ctx.ID().getText()}\n`,ts]
+            console.log("Arguments " + ctx.exp_list().map((ctx) => this.visit_node(ctx,ts)[0]).toString().replace(",",""))
+            return [`${ctx.exp_list().map((ctx) => this.visit_node(ctx,ts)[0]).join("")} call $${ctx.ID().getText()}\n`,ts]
         }
         if (ctx.ID() && ctx.L_PAREN() && ctx.R_PAREN){
             return [`call ${ctx.ID().getText()}`,ts]
         }
         if (ctx.L_PAREN() && ctx.exp(0) && ctx.R_PAREN()){
-            console.log(this.visit_node(ctx.exp(0),ts))
             return [ this.visit_node(ctx.exp(0),ts)[0] + "\n",ts]
         }
         if (ctx.L_CURLY_PAREN() && ctx.exp(0) && ctx.R_CURLY_PAREN()){
-            console.log(this.visit_node(ctx.exp(0),ts))
             return ["" + this.visit_node(ctx.exp(0),ts)[0] + "\n", ts]
         }
         if (ctx.ID()){
+            console.log(ts)
+            if (ts.get(ctx.ID().getText()) == "String")
+            {
+                return [`local.get $${ctx.ID().getText()}_o\nlocal.get $${ctx.ID().getText()}_l\n`,ts]
+            }
             return [`local.get $${ctx.ID().getText()}\n`,ts]
         }
         if (ctx.GLOBAL_ID()){
@@ -222,7 +227,7 @@ type Context = FContext | ExpContext | MContext | TContext | DefnContext
         }
         if (ctx.ADD() && ctx.DECIMAL_NUMBER() || ctx.DECIMAL_NUMBER())
         {
-                return [`f32.const ${ctx.DECIMAL_NUMBER().getText()}\n`, ts ]
+            return [`f32.const ${ctx.DECIMAL_NUMBER().getText()}\n`, ts ]
         }
         if (ctx.SUB() && ctx.NUMBER())
         {
@@ -232,11 +237,34 @@ type Context = FContext | ExpContext | MContext | TContext | DefnContext
         {
             return [`i32.const ${ctx.NUMBER().getText()} \n`, ts]
         }
+        if (ctx.STRING()) {
+           if (this.string_env.get(ctx.STRING().getText()))
+           {
+            const s = this.string_env.get(ctx.STRING().getText())
+            return [`i32.const ${s.offset}\ni32.const ${s.length}`,ts]
+           }
+           else {
+            console.log(ctx.STRING().getText())
+            const offset = this.counter
+            this.code_start += `(data (i32.const ${offset}) ${ctx.STRING().getText()})\n`
+            this.counter += ctx.STRING().getText().length - 2
+            return [`i32.const ${offset}\n i32.const ${ctx.STRING().getText().length - 2}`,ts]
+           }
+        }
     }
     
-    visitDefn(ctx: DefnContext, ts?: Map<String, String>): [String,Map<String,String>] {
+    visitDefn(ctx: DefnContext, ts: Map<String, String>): [String,Map<String,String>] {
         //TODO: ADD TYPING IN GRAMMAR TO TYPES AND ADD TO IF
         //TODO: REMOVE REDUNDANT CODE
+        //TODO: ADD - to negative numbers instead of using neg
+        if(ctx.VAL() && ctx.GLOBAL_ID() && ctx.COLON() && ctx.INT() && ctx.EQUAL() && ctx.NUMBER() && ctx.SUB()){
+            const new_ts = new Map<String,String>([...ts, [ctx.GLOBAL_ID().getText(), "Int"]])
+            return [`(global $${ctx.GLOBAL_ID().getText()} i32 (i32.const -${ctx.NUMBER().getText()}))\n`, new_ts]
+        }
+        if(ctx.VAL() && ctx.GLOBAL_ID() && ctx.COLON() && ctx.DOUBLE() && ctx.EQUAL() && ctx.DECIMAL_NUMBER() && ctx.SUB()){
+            const new_ts = new Map<String,String>([...ts, [ctx.GLOBAL_ID().getText(), "Double"]])
+            return [`(global $${ctx.GLOBAL_ID().getText()} f32 (f32.const -${ctx.DECIMAL_NUMBER().getText()}))\n`, new_ts]
+       }
         if(ctx.VAL() && ctx.GLOBAL_ID() && ctx.COLON() && ctx.INT() && ctx.EQUAL() && ctx.NUMBER()){
             const new_ts = new Map<String,String>([...ts, [ctx.GLOBAL_ID().getText(), "Int"]])
             return [`(global $${ctx.GLOBAL_ID().getText()} i32 (i32.const ${ctx.NUMBER().getText()}))\n`, new_ts]
@@ -246,6 +274,14 @@ type Context = FContext | ExpContext | MContext | TContext | DefnContext
             return [`(global $${ctx.GLOBAL_ID().getText()} f32 (f32.const ${ctx.DECIMAL_NUMBER().getText()}))\n`, new_ts]
        }
         //TODO: ENSURE GRAMMAR DIFFERENTIATES BETWEEN GLOBAL/LOCAL and TYPES, ADD TYPING ENV CHANGE
+        if(ctx.VAL() && ctx.ID() && ctx.COLON() && ctx.INT() && ctx.EQUAL() && ctx.NUMBER() && ctx.SUB()){
+            const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(), "Int"]])
+            return [`(local $${ctx.ID().getText()} i32)\n(local.set $${ctx.ID().getText()} (i32.const -${ctx.NUMBER().getText()}))\n`, new_ts]
+          }
+        if(ctx.VAL() && ctx.ID() && ctx.COLON() && ctx.DOUBLE() && ctx.EQUAL() && ctx.DECIMAL_NUMBER() && ctx.SUB()){
+               const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(), "Double"]])
+               return [`(local $${ctx.ID().getText()} f32)\n(local.set $${ctx.ID().getText()} (f32.const -${ctx.DECIMAL_NUMBER().getText()}))\n`, new_ts]
+        }
         if(ctx.VAL() && ctx.ID() && ctx.COLON() && ctx.INT() && ctx.EQUAL() && ctx.NUMBER()){
           const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(), "Int"]])
           return [`(local $${ctx.ID().getText()} i32)\n(local.set $${ctx.ID().getText()} (i32.const ${ctx.NUMBER().getText()}))\n`, new_ts]
@@ -253,6 +289,18 @@ type Context = FContext | ExpContext | MContext | TContext | DefnContext
         if(ctx.VAL() && ctx.ID() && ctx.COLON() && ctx.DOUBLE() && ctx.EQUAL() && ctx.DECIMAL_NUMBER()){
              const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(), "Double"]])
              return [`(local $${ctx.ID().getText()} f32)\n(local.set $${ctx.ID().getText()} (f32.const ${ctx.DECIMAL_NUMBER().getText()}))\n`, new_ts]
+        }
+        if(ctx.VAL() && (ctx.ID() || ctx.GLOBAL_ID())&& ctx.COLON() && ctx.STRING_TYPE() && ctx.EQUAL() && ctx.STRING()){
+            const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(), "String"]])
+            this.string_env.set(ctx.STRING().getText(),{ offset: this.counter, length: ctx.STRING().getText().length - 2})
+            this.code_start += `(data (i32.const ${this.counter}) ${ctx.STRING().getText()})`
+            this.counter += ctx.STRING().getText().length - 2
+            return [``, new_ts]
+        }
+        if (ctx.DEF()  && ctx.L_PAREN() && ctx.ID() && ctx.arg_list() && ctx.COLON && ctx.EQUAL() && ctx.exp() && ctx.STRING_TYPE()){
+            const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(), "String"]])
+            const [params, u_ts] = this.makeParams(ctx.arg_list(),new_ts)
+            return [`(func $${ctx.ID()} ${params} (result i32 i32)\n ${this.visit_node(ctx.exp(), u_ts)[0]})\n`,u_ts]
         }
         if (ctx.DEF()  && ctx.L_PAREN() && ctx.ID() && ctx.arg_list() && ctx.COLON && ctx.EQUAL() && ctx.exp() && ctx.DOUBLE()){
             const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(), "Int"]])
@@ -281,17 +329,24 @@ type Context = FContext | ExpContext | MContext | TContext | DefnContext
             const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(), "Void"]])
             return [`(func $${ctx.ID().getText()} (result  )\n ${this.visit_node(ctx.exp(), new_ts)[0]})\n`,new_ts]
         }
+        if (ctx.DEF()  && ctx.L_PAREN() && ctx.ID() && ctx.R_PAREN()  && ctx.COLON && ctx.EQUAL() && ctx.exp() && ctx.STRING_TYPE()){
+            const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(), "String"]])
+            return [`(func $${ctx.ID().getText()} (result i32 i32)\n ${this.visit_node(ctx.exp(), new_ts)[0]})\n`,new_ts]
+        }
     }
 
-    visitArg(ctx: ArgContext, ts?: Map<String, String>): [String, Map<String,String>] {
-        // console.log("here visited")
+    visitArg(ctx: ArgContext, ts: Map<String, String>): [String, Map<String,String>] {
         if (ctx.ID() && ctx.COLON() && ctx.INT()){
             const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(),"Int"]])
             return [`(param $${ctx.ID().getText()} i32) `, new_ts]
         }
         if (ctx.ID() && ctx.COLON() && ctx.DOUBLE()){
-            const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(),"Int"]])
+            const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(),"Double"]])
             return [`(param $${ctx.ID().getText()} f32)`, new_ts]
+        }
+        if (ctx.ID() && ctx.COLON() && ctx.STRING_TYPE()){
+            const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(),"String"]])
+            return [`(param $${ctx.ID().getText() + "_o"} i32) (param $${ctx.ID().getText() + "_l"} i32)`, new_ts]
         }
     }
 
@@ -302,8 +357,6 @@ type Context = FContext | ExpContext | MContext | TContext | DefnContext
         }
         if (ctx.exp_list()) {
             // TODO: ADD expression parser for env updating
-            console.log(this.visit_node(ctx.exp(0),ts))
-            console.log(this.visit_node(ctx.exp(1),ts))
             return ["(func (export \"main\") (result i32)\n" +  ctx.exp_list().map((ctx) => this.visit_node(ctx,ts)[0]).toString().replace(",","\n") + "i32.const 0\nreturn)\n", ts]
         }
        if (ctx.block()){
