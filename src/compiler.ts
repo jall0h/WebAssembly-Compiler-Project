@@ -257,34 +257,34 @@ type str_val = {offset: number; length: number}
         //TODO: ADD TYPING IN GRAMMAR TO TYPES AND ADD TO IF
         //TODO: REMOVE REDUNDANT CODE
         //TODO: ADD - to negative numbers instead of using neg
-        if(ctx.VAL() && ctx.GLOBAL_ID() && ctx.COLON() && ctx.INT() && ctx.EQUAL() && ctx.NUMBER() && ctx.SUB()){
+        if(ctx.VAL() && ctx.GLOBAL_ID() && ctx.COLON() && ctx.INT() && ctx.EQUAL() && ctx.NUMBER(0) && ctx.SUB()){
             const new_ts = new Map<String,String>([...ts, [ctx.GLOBAL_ID().getText(), "Int"]])
-            return [`(global $${ctx.GLOBAL_ID().getText()} i32 (i32.const -${ctx.NUMBER().getText()}))\n`, new_ts]
+            return [`(global $${ctx.GLOBAL_ID().getText()} i32 (i32.const -${ctx.NUMBER(0).getText()}))\n`, new_ts]
         }
         if(ctx.VAL() && ctx.GLOBAL_ID() && ctx.COLON() && ctx.DOUBLE() && ctx.EQUAL() && ctx.DECIMAL_NUMBER() && ctx.SUB()){
             const new_ts = new Map<String,String>([...ts, [ctx.GLOBAL_ID().getText(), "Double"]])
             return [`(global $${ctx.GLOBAL_ID().getText()} f32 (f32.const -${ctx.DECIMAL_NUMBER().getText()}))\n`, new_ts]
        }
-        if(ctx.VAL() && ctx.GLOBAL_ID() && ctx.COLON() && ctx.INT() && ctx.EQUAL() && ctx.NUMBER()){
+        if(ctx.VAL() && ctx.GLOBAL_ID() && ctx.COLON() && ctx.INT() && ctx.EQUAL() && ctx.NUMBER(0)){
             const new_ts = new Map<String,String>([...ts, [ctx.GLOBAL_ID().getText(), "Int"]])
-            return [`(global $${ctx.GLOBAL_ID().getText()} i32 (i32.const ${ctx.NUMBER().getText()}))\n`, new_ts]
+            return [`(global $${ctx.GLOBAL_ID().getText()} i32 (i32.const ${ctx.NUMBER(0).getText()}))\n`, new_ts]
         }
         if(ctx.VAL() && ctx.GLOBAL_ID() && ctx.COLON() && ctx.DOUBLE() && ctx.EQUAL() && ctx.DECIMAL_NUMBER()){
             const new_ts = new Map<String,String>([...ts, [ctx.GLOBAL_ID().getText(), "Double"]])
             return [`(global $${ctx.GLOBAL_ID().getText()} f32 (f32.const ${ctx.DECIMAL_NUMBER().getText()}))\n`, new_ts]
        }
         //TODO: ENSURE GRAMMAR DIFFERENTIATES BETWEEN GLOBAL/LOCAL and TYPES, ADD TYPING ENV CHANGE
-        if(ctx.VAL() && ctx.ID() && ctx.COLON() && ctx.INT() && ctx.EQUAL() && ctx.NUMBER() && ctx.SUB()){
+        if(ctx.VAL() && ctx.ID() && ctx.COLON() && ctx.INT() && ctx.EQUAL() && ctx.NUMBER(0) && ctx.SUB()){
             const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(), "Int"]])
-            return [`(local $${ctx.ID().getText()} i32)\n(local.set $${ctx.ID().getText()} (i32.const -${ctx.NUMBER().getText()}))\n`, new_ts]
+            return [`(local $${ctx.ID().getText()} i32)\n(local.set $${ctx.ID().getText()} (i32.const -${ctx.NUMBER(0).getText()}))\n`, new_ts]
           }
         if(ctx.VAL() && ctx.ID() && ctx.COLON() && ctx.DOUBLE() && ctx.EQUAL() && ctx.DECIMAL_NUMBER() && ctx.SUB()){
                const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(), "Double"]])
                return [`(local $${ctx.ID().getText()} f32)\n(local.set $${ctx.ID().getText()} (f32.const -${ctx.DECIMAL_NUMBER().getText()}))\n`, new_ts]
         }
-        if(ctx.VAL() && ctx.ID() && ctx.COLON() && ctx.INT() && ctx.EQUAL() && ctx.NUMBER()){
+        if(ctx.VAL() && ctx.ID() && ctx.COLON() && ctx.INT() && ctx.EQUAL() && ctx.NUMBER(0)){
           const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(), "Int"]])
-          return [`(local $${ctx.ID().getText()} i32)\n(local.set $${ctx.ID().getText()} (i32.const ${ctx.NUMBER().getText()}))\n`, new_ts]
+          return [`(local $${ctx.ID().getText()} i32)\n(local.set $${ctx.ID().getText()} (i32.const ${ctx.NUMBER(0).getText()}))\n`, new_ts]
         }
         if(ctx.VAL() && ctx.ID() && ctx.COLON() && ctx.DOUBLE() && ctx.EQUAL() && ctx.DECIMAL_NUMBER()){
              const new_ts = new Map<String,String>([...ts, [ctx.ID().getText(), "Double"]])
