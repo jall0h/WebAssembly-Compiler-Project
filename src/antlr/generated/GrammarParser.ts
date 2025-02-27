@@ -33,31 +33,34 @@ export default class GrammarParser extends Parser {
 	public static readonly DOUBLE = 12;
 	public static readonly STRING_TYPE = 13;
 	public static readonly VOID = 14;
-	public static readonly NUMBER = 15;
-	public static readonly DECIMAL_NUMBER = 16;
-	public static readonly ID = 17;
-	public static readonly GLOBAL_ID = 18;
-	public static readonly STRING = 19;
-	public static readonly ADD = 20;
-	public static readonly SUB = 21;
-	public static readonly MULT = 22;
-	public static readonly DIV = 23;
-	public static readonly MOD = 24;
-	public static readonly MORE_THAN = 25;
-	public static readonly LESS_THAN = 26;
-	public static readonly MORE_THAN_EQUAL = 27;
-	public static readonly LESS_THAN_EQUAL = 28;
-	public static readonly EQUAL_TO = 29;
-	public static readonly NOT_EQUAL_TO = 30;
-	public static readonly EQUAL = 31;
-	public static readonly L_CURLY_PAREN = 32;
-	public static readonly R_CURLY_PAREN = 33;
-	public static readonly L_PAREN = 34;
-	public static readonly R_PAREN = 35;
-	public static readonly SEMI_COLON = 36;
-	public static readonly COMMA = 37;
-	public static readonly COLON = 38;
-	public static readonly WHITESPACE = 39;
+	public static readonly ARRAY = 15;
+	public static readonly NUMBER = 16;
+	public static readonly DECIMAL_NUMBER = 17;
+	public static readonly ID = 18;
+	public static readonly GLOBAL_ID = 19;
+	public static readonly STRING = 20;
+	public static readonly ADD = 21;
+	public static readonly SUB = 22;
+	public static readonly MULT = 23;
+	public static readonly DIV = 24;
+	public static readonly MOD = 25;
+	public static readonly MORE_THAN = 26;
+	public static readonly LESS_THAN = 27;
+	public static readonly MORE_THAN_EQUAL = 28;
+	public static readonly LESS_THAN_EQUAL = 29;
+	public static readonly EQUAL_TO = 30;
+	public static readonly NOT_EQUAL_TO = 31;
+	public static readonly EQUAL = 32;
+	public static readonly L_CURLY_PAREN = 33;
+	public static readonly R_CURLY_PAREN = 34;
+	public static readonly L_SQUARE_PAREN = 35;
+	public static readonly R_SQUARE_PAREN = 36;
+	public static readonly L_PAREN = 37;
+	public static readonly R_PAREN = 38;
+	public static readonly SEMI_COLON = 39;
+	public static readonly COMMA = 40;
+	public static readonly COLON = 41;
+	public static readonly WHITESPACE = 42;
 	public static override readonly EOF = Token.EOF;
 	public static readonly RULE_exp = 0;
 	public static readonly RULE_m = 1;
@@ -76,19 +79,20 @@ export default class GrammarParser extends Parser {
                                                             "'val'", "'Int'", 
                                                             "'Double'", 
                                                             "'String'", 
-                                                            "'Void'", null, 
+                                                            "'Void'", "'array'", 
                                                             null, null, 
                                                             null, null, 
-                                                            "'+'", "'-'", 
-                                                            "'*'", "'/'", 
-                                                            "'%'", "'>'", 
-                                                            "'<'", "'>='", 
-                                                            "'<='", "'=='", 
-                                                            "'!='", "'='", 
-                                                            "'{'", "'}'", 
-                                                            "'('", "')'", 
-                                                            "';'", "','", 
-                                                            "':'" ];
+                                                            null, "'+'", 
+                                                            "'-'", "'*'", 
+                                                            "'/'", "'%'", 
+                                                            "'>'", "'<'", 
+                                                            "'>='", "'<='", 
+                                                            "'=='", "'!='", 
+                                                            "'='", "'{'", 
+                                                            "'}'", "'['", 
+                                                            "']'", "'('", 
+                                                            "')'", "';'", 
+                                                            "','", "':'" ];
 	public static readonly symbolicNames: (string | null)[] = [ null, "T_SKIP", 
                                                              "TRUE", "FALSE", 
                                                              "IF", "THEN", 
@@ -96,8 +100,8 @@ export default class GrammarParser extends Parser {
                                                              "DO", "DEF", 
                                                              "VAL", "INT", 
                                                              "DOUBLE", "STRING_TYPE", 
-                                                             "VOID", "NUMBER", 
-                                                             "DECIMAL_NUMBER", 
+                                                             "VOID", "ARRAY", 
+                                                             "NUMBER", "DECIMAL_NUMBER", 
                                                              "ID", "GLOBAL_ID", 
                                                              "STRING", "ADD", 
                                                              "SUB", "MULT", 
@@ -110,6 +114,8 @@ export default class GrammarParser extends Parser {
                                                              "NOT_EQUAL_TO", 
                                                              "EQUAL", "L_CURLY_PAREN", 
                                                              "R_CURLY_PAREN", 
+                                                             "L_SQUARE_PAREN", 
+                                                             "R_SQUARE_PAREN", 
                                                              "L_PAREN", 
                                                              "R_PAREN", 
                                                              "SEMI_COLON", 
@@ -226,7 +232,7 @@ export default class GrammarParser extends Parser {
 				this.t();
 				this.state = 37;
 				_la = this._input.LA(1);
-				if(!(_la===20 || _la===21)) {
+				if(!(_la===21 || _la===22)) {
 				this._errHandler.recoverInline(this);
 				}
 				else {
@@ -276,7 +282,7 @@ export default class GrammarParser extends Parser {
 				this.f();
 				this.state = 44;
 				_la = this._input.LA(1);
-				if(!((((_la) & ~0x1F) === 0 && ((1 << _la) & 29360128) !== 0))) {
+				if(!((((_la) & ~0x1F) === 0 && ((1 << _la) & 58720256) !== 0))) {
 				this._errHandler.recoverInline(this);
 				}
 				else {
@@ -316,7 +322,7 @@ export default class GrammarParser extends Parser {
 		this.enterRule(localctx, 6, GrammarParser.RULE_f);
 		let _la: number;
 		try {
-			this.state = 86;
+			this.state = 94;
 			this._errHandler.sync(this);
 			switch ( this._interp.adaptivePredict(this._input, 4, this._ctx) ) {
 			case 1:
@@ -353,7 +359,7 @@ export default class GrammarParser extends Parser {
 				this.state = 65;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la===37) {
+				while (_la===40) {
 					{
 					{
 					this.state = 61;
@@ -386,69 +392,95 @@ export default class GrammarParser extends Parser {
 				{
 				this.state = 73;
 				this.match(GrammarParser.ID);
+				this.state = 74;
+				this.match(GrammarParser.L_SQUARE_PAREN);
+				this.state = 75;
+				this.match(GrammarParser.NUMBER);
+				this.state = 76;
+				this.match(GrammarParser.R_SQUARE_PAREN);
 				}
 				break;
 			case 6:
 				this.enterOuterAlt(localctx, 6);
 				{
-				this.state = 74;
-				this.match(GrammarParser.GLOBAL_ID);
+				this.state = 77;
+				this.match(GrammarParser.ID);
 				}
 				break;
 			case 7:
 				this.enterOuterAlt(localctx, 7);
 				{
-				this.state = 75;
-				this.match(GrammarParser.SUB);
-				this.state = 76;
+				this.state = 78;
+				this.match(GrammarParser.GLOBAL_ID);
+				this.state = 79;
+				this.match(GrammarParser.L_SQUARE_PAREN);
+				this.state = 80;
 				this.match(GrammarParser.NUMBER);
+				this.state = 81;
+				this.match(GrammarParser.R_SQUARE_PAREN);
 				}
 				break;
 			case 8:
 				this.enterOuterAlt(localctx, 8);
 				{
-				this.state = 77;
-				this.match(GrammarParser.ADD);
-				this.state = 78;
-				this.match(GrammarParser.NUMBER);
+				this.state = 82;
+				this.match(GrammarParser.GLOBAL_ID);
 				}
 				break;
 			case 9:
 				this.enterOuterAlt(localctx, 9);
 				{
-				this.state = 79;
+				this.state = 83;
 				this.match(GrammarParser.SUB);
-				this.state = 80;
-				this.match(GrammarParser.DECIMAL_NUMBER);
+				this.state = 84;
+				this.match(GrammarParser.NUMBER);
 				}
 				break;
 			case 10:
 				this.enterOuterAlt(localctx, 10);
 				{
-				this.state = 81;
+				this.state = 85;
 				this.match(GrammarParser.ADD);
-				this.state = 82;
-				this.match(GrammarParser.DECIMAL_NUMBER);
+				this.state = 86;
+				this.match(GrammarParser.NUMBER);
 				}
 				break;
 			case 11:
 				this.enterOuterAlt(localctx, 11);
 				{
-				this.state = 83;
-				this.match(GrammarParser.NUMBER);
+				this.state = 87;
+				this.match(GrammarParser.SUB);
+				this.state = 88;
+				this.match(GrammarParser.DECIMAL_NUMBER);
 				}
 				break;
 			case 12:
 				this.enterOuterAlt(localctx, 12);
 				{
-				this.state = 84;
+				this.state = 89;
+				this.match(GrammarParser.ADD);
+				this.state = 90;
 				this.match(GrammarParser.DECIMAL_NUMBER);
 				}
 				break;
 			case 13:
 				this.enterOuterAlt(localctx, 13);
 				{
-				this.state = 85;
+				this.state = 91;
+				this.match(GrammarParser.NUMBER);
+				}
+				break;
+			case 14:
+				this.enterOuterAlt(localctx, 14);
+				{
+				this.state = 92;
+				this.match(GrammarParser.DECIMAL_NUMBER);
+				}
+				break;
+			case 15:
+				this.enterOuterAlt(localctx, 15);
+				{
+				this.state = 93;
 				this.match(GrammarParser.STRING);
 				}
 				break;
@@ -476,18 +508,18 @@ export default class GrammarParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 88;
+			this.state = 96;
 			this.exp();
-			this.state = 89;
+			this.state = 97;
 			_la = this._input.LA(1);
-			if(!((((_la) & ~0x1F) === 0 && ((1 << _la) & 2113929216) !== 0))) {
+			if(!((((_la) & ~0x1F) === 0 && ((1 << _la) & 4227858432) !== 0))) {
 			this._errHandler.recoverInline(this);
 			}
 			else {
 				this._errHandler.reportMatch(this);
 			    this.consume();
 			}
-			this.state = 90;
+			this.state = 98;
 			this.exp();
 			}
 		}
@@ -511,41 +543,41 @@ export default class GrammarParser extends Parser {
 		this.enterRule(localctx, 10, GrammarParser.RULE_defn);
 		let _la: number;
 		try {
-			this.state = 131;
+			this.state = 162;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 7, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 8, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 92;
-				this.match(GrammarParser.DEF);
-				this.state = 93;
-				this.match(GrammarParser.ID);
-				this.state = 94;
-				this.match(GrammarParser.L_PAREN);
-				this.state = 95;
-				this.arg();
 				this.state = 100;
+				this.match(GrammarParser.DEF);
+				this.state = 101;
+				this.match(GrammarParser.ID);
+				this.state = 102;
+				this.match(GrammarParser.L_PAREN);
+				this.state = 103;
+				this.arg();
+				this.state = 108;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la===37) {
+				while (_la===40) {
 					{
 					{
-					this.state = 96;
+					this.state = 104;
 					this.match(GrammarParser.COMMA);
-					this.state = 97;
+					this.state = 105;
 					this.arg();
 					}
 					}
-					this.state = 102;
+					this.state = 110;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
-				this.state = 103;
+				this.state = 111;
 				this.match(GrammarParser.R_PAREN);
-				this.state = 104;
+				this.state = 112;
 				this.match(GrammarParser.COLON);
-				this.state = 105;
+				this.state = 113;
 				_la = this._input.LA(1);
 				if(!((((_la) & ~0x1F) === 0 && ((1 << _la) & 30720) !== 0))) {
 				this._errHandler.recoverInline(this);
@@ -554,26 +586,26 @@ export default class GrammarParser extends Parser {
 					this._errHandler.reportMatch(this);
 				    this.consume();
 				}
-				this.state = 106;
+				this.state = 114;
 				this.match(GrammarParser.EQUAL);
-				this.state = 107;
+				this.state = 115;
 				this.exp();
 				}
 				break;
 			case 2:
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 109;
+				this.state = 117;
 				this.match(GrammarParser.DEF);
-				this.state = 110;
+				this.state = 118;
 				this.match(GrammarParser.ID);
-				this.state = 111;
+				this.state = 119;
 				this.match(GrammarParser.L_PAREN);
-				this.state = 112;
+				this.state = 120;
 				this.match(GrammarParser.R_PAREN);
-				this.state = 113;
+				this.state = 121;
 				this.match(GrammarParser.COLON);
-				this.state = 114;
+				this.state = 122;
 				_la = this._input.LA(1);
 				if(!((((_la) & ~0x1F) === 0 && ((1 << _la) & 30720) !== 0))) {
 				this._errHandler.recoverInline(this);
@@ -582,29 +614,29 @@ export default class GrammarParser extends Parser {
 					this._errHandler.reportMatch(this);
 				    this.consume();
 				}
-				this.state = 115;
+				this.state = 123;
 				this.match(GrammarParser.EQUAL);
-				this.state = 116;
+				this.state = 124;
 				this.exp();
 				}
 				break;
 			case 3:
 				this.enterOuterAlt(localctx, 3);
 				{
-				this.state = 117;
+				this.state = 125;
 				this.match(GrammarParser.VAL);
-				this.state = 118;
+				this.state = 126;
 				_la = this._input.LA(1);
-				if(!(_la===17 || _la===18)) {
+				if(!(_la===18 || _la===19)) {
 				this._errHandler.recoverInline(this);
 				}
 				else {
 					this._errHandler.reportMatch(this);
 				    this.consume();
 				}
-				this.state = 119;
+				this.state = 127;
 				this.match(GrammarParser.COLON);
-				this.state = 120;
+				this.state = 128;
 				_la = this._input.LA(1);
 				if(!((((_la) & ~0x1F) === 0 && ((1 << _la) & 14336) !== 0))) {
 				this._errHandler.recoverInline(this);
@@ -613,42 +645,139 @@ export default class GrammarParser extends Parser {
 					this._errHandler.reportMatch(this);
 				    this.consume();
 				}
-				this.state = 121;
-				this.match(GrammarParser.EQUAL);
 				this.state = 129;
+				this.match(GrammarParser.EQUAL);
+				this.state = 137;
 				this._errHandler.sync(this);
 				switch ( this._interp.adaptivePredict(this._input, 6, this._ctx) ) {
 				case 1:
 					{
-					this.state = 122;
+					this.state = 130;
 					this.match(GrammarParser.NUMBER);
 					}
 					break;
 				case 2:
 					{
-					this.state = 123;
+					this.state = 131;
 					this.match(GrammarParser.DECIMAL_NUMBER);
 					}
 					break;
 				case 3:
 					{
-					this.state = 124;
+					this.state = 132;
 					this.match(GrammarParser.SUB);
-					this.state = 125;
+					this.state = 133;
 					this.match(GrammarParser.DECIMAL_NUMBER);
 					}
 					break;
 				case 4:
 					{
-					this.state = 126;
+					this.state = 134;
 					this.match(GrammarParser.SUB);
-					this.state = 127;
+					this.state = 135;
 					this.match(GrammarParser.NUMBER);
 					}
 					break;
 				case 5:
 					{
-					this.state = 128;
+					this.state = 136;
+					this.match(GrammarParser.STRING);
+					}
+					break;
+				}
+				}
+				break;
+			case 4:
+				this.enterOuterAlt(localctx, 4);
+				{
+				this.state = 139;
+				this.match(GrammarParser.VAL);
+				this.state = 140;
+				_la = this._input.LA(1);
+				if(!(_la===18 || _la===19)) {
+				this._errHandler.recoverInline(this);
+				}
+				else {
+					this._errHandler.reportMatch(this);
+				    this.consume();
+				}
+				this.state = 141;
+				this.match(GrammarParser.L_SQUARE_PAREN);
+				this.state = 142;
+				this.match(GrammarParser.NUMBER);
+				this.state = 143;
+				this.match(GrammarParser.R_SQUARE_PAREN);
+				this.state = 144;
+				this.match(GrammarParser.COLON);
+				this.state = 145;
+				this.match(GrammarParser.L_SQUARE_PAREN);
+				this.state = 146;
+				_la = this._input.LA(1);
+				if(!(_la===11 || _la===12)) {
+				this._errHandler.recoverInline(this);
+				}
+				else {
+					this._errHandler.reportMatch(this);
+				    this.consume();
+				}
+				this.state = 147;
+				this.match(GrammarParser.R_SQUARE_PAREN);
+				}
+				break;
+			case 5:
+				this.enterOuterAlt(localctx, 5);
+				{
+				this.state = 148;
+				_la = this._input.LA(1);
+				if(!(_la===18 || _la===19)) {
+				this._errHandler.recoverInline(this);
+				}
+				else {
+					this._errHandler.reportMatch(this);
+				    this.consume();
+				}
+				this.state = 149;
+				this.match(GrammarParser.L_SQUARE_PAREN);
+				this.state = 150;
+				this.match(GrammarParser.NUMBER);
+				this.state = 151;
+				this.match(GrammarParser.R_SQUARE_PAREN);
+				this.state = 152;
+				this.match(GrammarParser.EQUAL);
+				this.state = 160;
+				this._errHandler.sync(this);
+				switch ( this._interp.adaptivePredict(this._input, 7, this._ctx) ) {
+				case 1:
+					{
+					this.state = 153;
+					this.match(GrammarParser.NUMBER);
+					}
+					break;
+				case 2:
+					{
+					this.state = 154;
+					this.match(GrammarParser.DECIMAL_NUMBER);
+					}
+					break;
+				case 3:
+					{
+					this.state = 155;
+					this.match(GrammarParser.SUB);
+					this.state = 156;
+					this.match(GrammarParser.DECIMAL_NUMBER);
+					}
+					break;
+				case 4:
+					{
+					this.state = 157;
+					this.match(GrammarParser.SUB);
+					this.state = 158;
+					this.match(GrammarParser.NUMBER);
+					}
+					break;
+				case 5:
+					{
+					this.state = 159;
 					this.match(GrammarParser.STRING);
 					}
 					break;
@@ -677,43 +806,43 @@ export default class GrammarParser extends Parser {
 		this.enterRule(localctx, 12, GrammarParser.RULE_prog);
 		let _la: number;
 		try {
-			this.state = 143;
+			this.state = 174;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 9, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 10, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 133;
+				this.state = 164;
 				this.defn();
-				this.state = 134;
+				this.state = 165;
 				this.match(GrammarParser.SEMI_COLON);
-				this.state = 135;
+				this.state = 166;
 				this.prog();
 				}
 				break;
 			case 2:
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 138;
+				this.state = 169;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				do {
 					{
 					{
-					this.state = 137;
+					this.state = 168;
 					this.exp();
 					}
 					}
-					this.state = 140;
+					this.state = 171;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
-				} while ((((_la) & ~0x1F) === 0 && ((1 << _la) & 4161554) !== 0) || _la===32 || _la===34);
+				} while ((((_la) & ~0x1F) === 0 && ((1 << _la) & 8323090) !== 0) || _la===33 || _la===37);
 				}
 				break;
 			case 3:
 				this.enterOuterAlt(localctx, 3);
 				{
-				this.state = 142;
+				this.state = 173;
 				this.block();
 				}
 				break;
@@ -740,11 +869,11 @@ export default class GrammarParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 145;
+			this.state = 176;
 			this.match(GrammarParser.L_CURLY_PAREN);
-			this.state = 146;
+			this.state = 177;
 			this.prog();
-			this.state = 147;
+			this.state = 178;
 			this.match(GrammarParser.R_CURLY_PAREN);
 			}
 		}
@@ -770,11 +899,11 @@ export default class GrammarParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 149;
+			this.state = 180;
 			this.match(GrammarParser.ID);
-			this.state = 150;
+			this.state = 181;
 			this.match(GrammarParser.COLON);
-			this.state = 151;
+			this.state = 182;
 			_la = this._input.LA(1);
 			if(!((((_la) & ~0x1F) === 0 && ((1 << _la) & 14336) !== 0))) {
 			this._errHandler.recoverInline(this);
@@ -800,55 +929,65 @@ export default class GrammarParser extends Parser {
 		return localctx;
 	}
 
-	public static readonly _serializedATN: number[] = [4,1,39,154,2,0,7,0,2,
+	public static readonly _serializedATN: number[] = [4,1,42,185,2,0,7,0,2,
 	1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,7,7,2,8,7,8,1,0,1,0,1,
 	0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,3,0,35,8,0,1,1,1,
 	1,1,1,1,1,1,1,3,1,42,8,1,1,2,1,2,1,2,1,2,1,2,3,2,49,8,2,1,3,1,3,1,3,1,3,
 	1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,5,3,64,8,3,10,3,12,3,67,9,3,1,3,1,3,
-	1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,3,3,87,
-	8,3,1,4,1,4,1,4,1,4,1,5,1,5,1,5,1,5,1,5,1,5,5,5,99,8,5,10,5,12,5,102,9,
-	5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,
-	5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,3,5,130,8,5,3,5,132,8,5,1,6,1,6,1,6,1,
-	6,1,6,4,6,139,8,6,11,6,12,6,140,1,6,3,6,144,8,6,1,7,1,7,1,7,1,7,1,8,1,8,
-	1,8,1,8,1,8,0,0,9,0,2,4,6,8,10,12,14,16,0,6,1,0,20,21,1,0,22,24,1,0,25,
-	30,1,0,11,14,1,0,17,18,1,0,11,13,173,0,34,1,0,0,0,2,41,1,0,0,0,4,48,1,0,
-	0,0,6,86,1,0,0,0,8,88,1,0,0,0,10,131,1,0,0,0,12,143,1,0,0,0,14,145,1,0,
-	0,0,16,149,1,0,0,0,18,35,5,1,0,0,19,20,5,1,0,0,20,21,5,34,0,0,21,35,5,35,
-	0,0,22,23,5,4,0,0,23,24,3,8,4,0,24,25,5,5,0,0,25,26,3,0,0,0,26,27,5,6,0,
-	0,27,28,3,0,0,0,28,35,1,0,0,0,29,30,3,2,1,0,30,31,5,36,0,0,31,32,3,0,0,
-	0,32,35,1,0,0,0,33,35,3,2,1,0,34,18,1,0,0,0,34,19,1,0,0,0,34,22,1,0,0,0,
-	34,29,1,0,0,0,34,33,1,0,0,0,35,1,1,0,0,0,36,37,3,4,2,0,37,38,7,0,0,0,38,
-	39,3,0,0,0,39,42,1,0,0,0,40,42,3,4,2,0,41,36,1,0,0,0,41,40,1,0,0,0,42,3,
-	1,0,0,0,43,44,3,6,3,0,44,45,7,1,0,0,45,46,3,4,2,0,46,49,1,0,0,0,47,49,3,
-	6,3,0,48,43,1,0,0,0,48,47,1,0,0,0,49,5,1,0,0,0,50,51,5,34,0,0,51,52,3,0,
-	0,0,52,53,5,35,0,0,53,87,1,0,0,0,54,55,5,32,0,0,55,56,3,0,0,0,56,57,5,33,
-	0,0,57,87,1,0,0,0,58,59,5,17,0,0,59,60,5,34,0,0,60,65,3,0,0,0,61,62,5,37,
-	0,0,62,64,3,0,0,0,63,61,1,0,0,0,64,67,1,0,0,0,65,63,1,0,0,0,65,66,1,0,0,
-	0,66,68,1,0,0,0,67,65,1,0,0,0,68,69,5,35,0,0,69,87,1,0,0,0,70,71,5,17,0,
-	0,71,72,5,34,0,0,72,87,5,35,0,0,73,87,5,17,0,0,74,87,5,18,0,0,75,76,5,21,
-	0,0,76,87,5,15,0,0,77,78,5,20,0,0,78,87,5,15,0,0,79,80,5,21,0,0,80,87,5,
-	16,0,0,81,82,5,20,0,0,82,87,5,16,0,0,83,87,5,15,0,0,84,87,5,16,0,0,85,87,
-	5,19,0,0,86,50,1,0,0,0,86,54,1,0,0,0,86,58,1,0,0,0,86,70,1,0,0,0,86,73,
-	1,0,0,0,86,74,1,0,0,0,86,75,1,0,0,0,86,77,1,0,0,0,86,79,1,0,0,0,86,81,1,
-	0,0,0,86,83,1,0,0,0,86,84,1,0,0,0,86,85,1,0,0,0,87,7,1,0,0,0,88,89,3,0,
-	0,0,89,90,7,2,0,0,90,91,3,0,0,0,91,9,1,0,0,0,92,93,5,9,0,0,93,94,5,17,0,
-	0,94,95,5,34,0,0,95,100,3,16,8,0,96,97,5,37,0,0,97,99,3,16,8,0,98,96,1,
-	0,0,0,99,102,1,0,0,0,100,98,1,0,0,0,100,101,1,0,0,0,101,103,1,0,0,0,102,
-	100,1,0,0,0,103,104,5,35,0,0,104,105,5,38,0,0,105,106,7,3,0,0,106,107,5,
-	31,0,0,107,108,3,0,0,0,108,132,1,0,0,0,109,110,5,9,0,0,110,111,5,17,0,0,
-	111,112,5,34,0,0,112,113,5,35,0,0,113,114,5,38,0,0,114,115,7,3,0,0,115,
-	116,5,31,0,0,116,132,3,0,0,0,117,118,5,10,0,0,118,119,7,4,0,0,119,120,5,
-	38,0,0,120,121,7,5,0,0,121,129,5,31,0,0,122,130,5,15,0,0,123,130,5,16,0,
-	0,124,125,5,21,0,0,125,130,5,16,0,0,126,127,5,21,0,0,127,130,5,15,0,0,128,
-	130,5,19,0,0,129,122,1,0,0,0,129,123,1,0,0,0,129,124,1,0,0,0,129,126,1,
-	0,0,0,129,128,1,0,0,0,130,132,1,0,0,0,131,92,1,0,0,0,131,109,1,0,0,0,131,
-	117,1,0,0,0,132,11,1,0,0,0,133,134,3,10,5,0,134,135,5,36,0,0,135,136,3,
-	12,6,0,136,144,1,0,0,0,137,139,3,0,0,0,138,137,1,0,0,0,139,140,1,0,0,0,
-	140,138,1,0,0,0,140,141,1,0,0,0,141,144,1,0,0,0,142,144,3,14,7,0,143,133,
-	1,0,0,0,143,138,1,0,0,0,143,142,1,0,0,0,144,13,1,0,0,0,145,146,5,32,0,0,
-	146,147,3,12,6,0,147,148,5,33,0,0,148,15,1,0,0,0,149,150,5,17,0,0,150,151,
-	5,38,0,0,151,152,7,5,0,0,152,17,1,0,0,0,10,34,41,48,65,86,100,129,131,140,
-	143];
+	1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,
+	1,3,1,3,1,3,1,3,1,3,1,3,3,3,95,8,3,1,4,1,4,1,4,1,4,1,5,1,5,1,5,1,5,1,5,
+	1,5,5,5,107,8,5,10,5,12,5,110,9,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,
+	5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,3,5,138,
+	8,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,
+	1,5,1,5,1,5,1,5,3,5,161,8,5,3,5,163,8,5,1,6,1,6,1,6,1,6,1,6,4,6,170,8,6,
+	11,6,12,6,171,1,6,3,6,175,8,6,1,7,1,7,1,7,1,7,1,8,1,8,1,8,1,8,1,8,0,0,9,
+	0,2,4,6,8,10,12,14,16,0,7,1,0,21,22,1,0,23,25,1,0,26,31,1,0,11,14,1,0,18,
+	19,1,0,11,13,1,0,11,12,212,0,34,1,0,0,0,2,41,1,0,0,0,4,48,1,0,0,0,6,94,
+	1,0,0,0,8,96,1,0,0,0,10,162,1,0,0,0,12,174,1,0,0,0,14,176,1,0,0,0,16,180,
+	1,0,0,0,18,35,5,1,0,0,19,20,5,1,0,0,20,21,5,37,0,0,21,35,5,38,0,0,22,23,
+	5,4,0,0,23,24,3,8,4,0,24,25,5,5,0,0,25,26,3,0,0,0,26,27,5,6,0,0,27,28,3,
+	0,0,0,28,35,1,0,0,0,29,30,3,2,1,0,30,31,5,39,0,0,31,32,3,0,0,0,32,35,1,
+	0,0,0,33,35,3,2,1,0,34,18,1,0,0,0,34,19,1,0,0,0,34,22,1,0,0,0,34,29,1,0,
+	0,0,34,33,1,0,0,0,35,1,1,0,0,0,36,37,3,4,2,0,37,38,7,0,0,0,38,39,3,0,0,
+	0,39,42,1,0,0,0,40,42,3,4,2,0,41,36,1,0,0,0,41,40,1,0,0,0,42,3,1,0,0,0,
+	43,44,3,6,3,0,44,45,7,1,0,0,45,46,3,4,2,0,46,49,1,0,0,0,47,49,3,6,3,0,48,
+	43,1,0,0,0,48,47,1,0,0,0,49,5,1,0,0,0,50,51,5,37,0,0,51,52,3,0,0,0,52,53,
+	5,38,0,0,53,95,1,0,0,0,54,55,5,33,0,0,55,56,3,0,0,0,56,57,5,34,0,0,57,95,
+	1,0,0,0,58,59,5,18,0,0,59,60,5,37,0,0,60,65,3,0,0,0,61,62,5,40,0,0,62,64,
+	3,0,0,0,63,61,1,0,0,0,64,67,1,0,0,0,65,63,1,0,0,0,65,66,1,0,0,0,66,68,1,
+	0,0,0,67,65,1,0,0,0,68,69,5,38,0,0,69,95,1,0,0,0,70,71,5,18,0,0,71,72,5,
+	37,0,0,72,95,5,38,0,0,73,74,5,18,0,0,74,75,5,35,0,0,75,76,5,16,0,0,76,95,
+	5,36,0,0,77,95,5,18,0,0,78,79,5,19,0,0,79,80,5,35,0,0,80,81,5,16,0,0,81,
+	95,5,36,0,0,82,95,5,19,0,0,83,84,5,22,0,0,84,95,5,16,0,0,85,86,5,21,0,0,
+	86,95,5,16,0,0,87,88,5,22,0,0,88,95,5,17,0,0,89,90,5,21,0,0,90,95,5,17,
+	0,0,91,95,5,16,0,0,92,95,5,17,0,0,93,95,5,20,0,0,94,50,1,0,0,0,94,54,1,
+	0,0,0,94,58,1,0,0,0,94,70,1,0,0,0,94,73,1,0,0,0,94,77,1,0,0,0,94,78,1,0,
+	0,0,94,82,1,0,0,0,94,83,1,0,0,0,94,85,1,0,0,0,94,87,1,0,0,0,94,89,1,0,0,
+	0,94,91,1,0,0,0,94,92,1,0,0,0,94,93,1,0,0,0,95,7,1,0,0,0,96,97,3,0,0,0,
+	97,98,7,2,0,0,98,99,3,0,0,0,99,9,1,0,0,0,100,101,5,9,0,0,101,102,5,18,0,
+	0,102,103,5,37,0,0,103,108,3,16,8,0,104,105,5,40,0,0,105,107,3,16,8,0,106,
+	104,1,0,0,0,107,110,1,0,0,0,108,106,1,0,0,0,108,109,1,0,0,0,109,111,1,0,
+	0,0,110,108,1,0,0,0,111,112,5,38,0,0,112,113,5,41,0,0,113,114,7,3,0,0,114,
+	115,5,32,0,0,115,116,3,0,0,0,116,163,1,0,0,0,117,118,5,9,0,0,118,119,5,
+	18,0,0,119,120,5,37,0,0,120,121,5,38,0,0,121,122,5,41,0,0,122,123,7,3,0,
+	0,123,124,5,32,0,0,124,163,3,0,0,0,125,126,5,10,0,0,126,127,7,4,0,0,127,
+	128,5,41,0,0,128,129,7,5,0,0,129,137,5,32,0,0,130,138,5,16,0,0,131,138,
+	5,17,0,0,132,133,5,22,0,0,133,138,5,17,0,0,134,135,5,22,0,0,135,138,5,16,
+	0,0,136,138,5,20,0,0,137,130,1,0,0,0,137,131,1,0,0,0,137,132,1,0,0,0,137,
+	134,1,0,0,0,137,136,1,0,0,0,138,163,1,0,0,0,139,140,5,10,0,0,140,141,7,
+	4,0,0,141,142,5,35,0,0,142,143,5,16,0,0,143,144,5,36,0,0,144,145,5,41,0,
+	0,145,146,5,35,0,0,146,147,7,6,0,0,147,163,5,36,0,0,148,149,7,4,0,0,149,
+	150,5,35,0,0,150,151,5,16,0,0,151,152,5,36,0,0,152,160,5,32,0,0,153,161,
+	5,16,0,0,154,161,5,17,0,0,155,156,5,22,0,0,156,161,5,17,0,0,157,158,5,22,
+	0,0,158,161,5,16,0,0,159,161,5,20,0,0,160,153,1,0,0,0,160,154,1,0,0,0,160,
+	155,1,0,0,0,160,157,1,0,0,0,160,159,1,0,0,0,161,163,1,0,0,0,162,100,1,0,
+	0,0,162,117,1,0,0,0,162,125,1,0,0,0,162,139,1,0,0,0,162,148,1,0,0,0,163,
+	11,1,0,0,0,164,165,3,10,5,0,165,166,5,39,0,0,166,167,3,12,6,0,167,175,1,
+	0,0,0,168,170,3,0,0,0,169,168,1,0,0,0,170,171,1,0,0,0,171,169,1,0,0,0,171,
+	172,1,0,0,0,172,175,1,0,0,0,173,175,3,14,7,0,174,164,1,0,0,0,174,169,1,
+	0,0,0,174,173,1,0,0,0,175,13,1,0,0,0,176,177,5,33,0,0,177,178,3,12,6,0,
+	178,179,5,34,0,0,179,15,1,0,0,0,180,181,5,18,0,0,181,182,5,41,0,0,182,183,
+	7,5,0,0,183,17,1,0,0,0,11,34,41,48,65,94,108,137,160,162,171,174];
 
 	private static __ATN: ATN;
 	public static get _ATN(): ATN {
@@ -1043,14 +1182,20 @@ export class FContext extends ParserRuleContext {
 	public COMMA(i: number): TerminalNode {
 		return this.getToken(GrammarParser.COMMA, i);
 	}
+	public L_SQUARE_PAREN(): TerminalNode {
+		return this.getToken(GrammarParser.L_SQUARE_PAREN, 0);
+	}
+	public NUMBER(): TerminalNode {
+		return this.getToken(GrammarParser.NUMBER, 0);
+	}
+	public R_SQUARE_PAREN(): TerminalNode {
+		return this.getToken(GrammarParser.R_SQUARE_PAREN, 0);
+	}
 	public GLOBAL_ID(): TerminalNode {
 		return this.getToken(GrammarParser.GLOBAL_ID, 0);
 	}
 	public SUB(): TerminalNode {
 		return this.getToken(GrammarParser.SUB, 0);
-	}
-	public NUMBER(): TerminalNode {
-		return this.getToken(GrammarParser.NUMBER, 0);
 	}
 	public ADD(): TerminalNode {
 		return this.getToken(GrammarParser.ADD, 0);
@@ -1194,8 +1339,11 @@ export class DefnContext extends ParserRuleContext {
 	public GLOBAL_ID(): TerminalNode {
 		return this.getToken(GrammarParser.GLOBAL_ID, 0);
 	}
-	public NUMBER(): TerminalNode {
-		return this.getToken(GrammarParser.NUMBER, 0);
+	public NUMBER_list(): TerminalNode[] {
+	    	return this.getTokens(GrammarParser.NUMBER);
+	}
+	public NUMBER(i: number): TerminalNode {
+		return this.getToken(GrammarParser.NUMBER, i);
 	}
 	public DECIMAL_NUMBER(): TerminalNode {
 		return this.getToken(GrammarParser.DECIMAL_NUMBER, 0);
@@ -1205,6 +1353,18 @@ export class DefnContext extends ParserRuleContext {
 	}
 	public STRING(): TerminalNode {
 		return this.getToken(GrammarParser.STRING, 0);
+	}
+	public L_SQUARE_PAREN_list(): TerminalNode[] {
+	    	return this.getTokens(GrammarParser.L_SQUARE_PAREN);
+	}
+	public L_SQUARE_PAREN(i: number): TerminalNode {
+		return this.getToken(GrammarParser.L_SQUARE_PAREN, i);
+	}
+	public R_SQUARE_PAREN_list(): TerminalNode[] {
+	    	return this.getTokens(GrammarParser.R_SQUARE_PAREN);
+	}
+	public R_SQUARE_PAREN(i: number): TerminalNode {
+		return this.getToken(GrammarParser.R_SQUARE_PAREN, i);
 	}
     public get ruleIndex(): number {
     	return GrammarParser.RULE_defn;
