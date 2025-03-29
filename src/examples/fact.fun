@@ -6,12 +6,5 @@ def facT(n: Int, acc: Int) : Int =
 
 def facTi(n: Int) : Int = facT(n, 1);
 
-def top() : Void = {
-  print_int(fact(6));
-  new_line();
-  print_int(facTi(6));
-  new_line()
-};
-
-top()
+facT(100,1)
 

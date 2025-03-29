@@ -3,7 +3,7 @@
 import {ParseTree, ParseTreeVisitor} from 'antlr4';
 
 
-import { ArgContext, ExpContext } from "./GrammarParser.js";
+import { AContext, ArgContext, Array_indexContext, ExpContext, TaContext } from "./GrammarParser.js";
 import { MContext } from "./GrammarParser.js";
 import { TContext } from "./GrammarParser.js";
 import { FContext } from "./GrammarParser.js";
@@ -11,6 +11,8 @@ import { BexpContext } from "./GrammarParser.js";
 import { DefnContext } from "./GrammarParser.js";
 import { ProgContext } from "./GrammarParser.js";
 import { BlockContext } from "./GrammarParser.js";
+import { type_env } from '../../types.js';
+
 
 
 /**
@@ -21,9 +23,7 @@ import { BlockContext } from "./GrammarParser.js";
  * operations with no return type.
  */
 export default class GrammarVisitor<Result> extends ParseTreeVisitor<Result> {
-	// visit(tree: ParseTree, ts: Map<String,String>): Result;
-
-	visit_node(tree: ParseTree, ts: Map<String,String>): Result {
+	visit_node(tree: ParseTree, ts: type_env): Result {
 		if (tree instanceof ExpContext){
 			return this.visitExp(tree,ts)
 		}
@@ -39,6 +39,12 @@ export default class GrammarVisitor<Result> extends ParseTreeVisitor<Result> {
 		if (tree instanceof BexpContext){
 			return this.visitBexp(tree,ts)
 		}
+		if (tree instanceof TaContext){
+			return this.visitTa(tree,ts)
+		}
+		if (tree instanceof AContext){
+			return this.visitA(tree,ts)
+		}
 		if (tree instanceof DefnContext){
 			return this.visitDefn(tree,ts)
 		}
@@ -51,57 +57,74 @@ export default class GrammarVisitor<Result> extends ParseTreeVisitor<Result> {
 		if (tree instanceof ArgContext){
 			return this.visitArg(tree,ts)
 		}
+		if (tree instanceof Array_indexContext){
+			return this.visitArray_index(tree,ts)
+		}
 	}
 	/**
 	 * Visit a parse tree produced by `GrammarParser.exp`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitExp?(ctx: ExpContext, ts?: Map<String,String>):Result;
+	visitExp?(ctx: ExpContext, ts?: type_env):Result;
 	/**
 	 * Visit a parse tree produced by `GrammarParser.m`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitM?(ctx: MContext, ts?: Map<String,String>):Result;
+	visitM?(ctx: MContext, ts?: type_env):Result;
 	/**
 	 * Visit a parse tree produced by `GrammarParser.t`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitT?(ctx: TContext, ts?: Map<String,String>):Result;
+	visitT?(ctx: TContext, ts?: type_env):Result;
 	/**
 	 * Visit a parse tree produced by `GrammarParser.f`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitF?(ctx: FContext, ts?: Map<String,String>):Result;
+	visitF?(ctx: FContext, ts?: type_env):Result;
 	/**
 	 * Visit a parse tree produced by `GrammarParser.bexp`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitBexp?(ctx: BexpContext, ts?: Map<String,String>):Result;
+	visitBexp?(ctx: BexpContext, ts?: type_env):Result;
+	/**
+	 * Visit a parse tree produced by `GrammarParser.a`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitA?(ctx: AContext, ts?: type_env):Result;
+	/**
+	 * Visit a parse tree produced by `GrammarParser.ta`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitTa?(ctx: TaContext, ts?: type_env):Result;
 	/**
 	 * Visit a parse tree produced by `GrammarParser.defn`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitDefn?(ctx: DefnContext, ts?: Map<String,String>):Result;
+	visitDefn?(ctx: DefnContext, ts?: type_env):Result;
 	/**
 	 * Visit a parse tree produced by `GrammarParser.prog`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitProg?(ctx: ProgContext, ts?: Map<String,String>):Result;
+	visitProg?(ctx: ProgContext, ts?: type_env):Result;
 	/**
 	 * Visit a parse tree produced by `GrammarParser.block`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitBlock?(ctx: BlockContext, ts?: Map<String,String>):Result;
+	visitBlock?(ctx: BlockContext, ts?: type_env):Result;
 
-	visitArg?(ctx: ArgContext, ts?: Map<String,String>):Result;
+	visitArg?(ctx: ArgContext, ts?: type_env):Result;
+	
+	visitArray_index?(ctx: Array_indexContext, ts?: type_env):Result;
 
 
 }

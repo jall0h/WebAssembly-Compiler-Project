@@ -8,7 +8,10 @@ import { MContext } from "./GrammarParser.js";
 import { TContext } from "./GrammarParser.js";
 import { FContext } from "./GrammarParser.js";
 import { BexpContext } from "./GrammarParser.js";
+import { AContext } from "./GrammarParser.js";
+import { TaContext } from "./GrammarParser.js";
 import { DefnContext } from "./GrammarParser.js";
+import { Array_indexContext } from "./GrammarParser.js";
 import { ProgContext } from "./GrammarParser.js";
 import { BlockContext } from "./GrammarParser.js";
 import { ArgContext } from "./GrammarParser.js";
@@ -70,6 +73,26 @@ export default class GrammarListener extends ParseTreeListener {
 	 */
 	exitBexp?: (ctx: BexpContext) => void;
 	/**
+	 * Enter a parse tree produced by `GrammarParser.a`.
+	 * @param ctx the parse tree
+	 */
+	enterA?: (ctx: AContext) => void;
+	/**
+	 * Exit a parse tree produced by `GrammarParser.a`.
+	 * @param ctx the parse tree
+	 */
+	exitA?: (ctx: AContext) => void;
+	/**
+	 * Enter a parse tree produced by `GrammarParser.ta`.
+	 * @param ctx the parse tree
+	 */
+	enterTa?: (ctx: TaContext) => void;
+	/**
+	 * Exit a parse tree produced by `GrammarParser.ta`.
+	 * @param ctx the parse tree
+	 */
+	exitTa?: (ctx: TaContext) => void;
+	/**
 	 * Enter a parse tree produced by `GrammarParser.defn`.
 	 * @param ctx the parse tree
 	 */
@@ -79,6 +102,16 @@ export default class GrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitDefn?: (ctx: DefnContext) => void;
+	/**
+	 * Enter a parse tree produced by `GrammarParser.array_index`.
+	 * @param ctx the parse tree
+	 */
+	enterArray_index?: (ctx: Array_indexContext) => void;
+	/**
+	 * Exit a parse tree produced by `GrammarParser.array_index`.
+	 * @param ctx the parse tree
+	 */
+	exitArray_index?: (ctx: Array_indexContext) => void;
 	/**
 	 * Enter a parse tree produced by `GrammarParser.prog`.
 	 * @param ctx the parse tree
