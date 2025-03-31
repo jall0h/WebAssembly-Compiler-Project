@@ -31,7 +31,15 @@ f
     | STRING
     ;
 
-bexp: exp (EQUAL_TO | NOT_EQUAL_TO | LESS_THAN | MORE_THAN | LESS_THAN_EQUAL | MORE_THAN_EQUAL) exp;
+bexp: a OR_OP bexp
+        | a
+        ;
+
+a: ta AND_OP a 
+  | ta;
+
+ta: L_PAREN bexp R_PAREN
+   | exp (EQUAL_TO | NOT_EQUAL_TO | LESS_THAN | MORE_THAN | LESS_THAN_EQUAL | MORE_THAN_EQUAL) exp;
 
 defn
     : DEF ID L_PAREN arg (COMMA arg)* R_PAREN COLON (INT | DOUBLE | STRING_TYPE | VOID) EQUAL exp
@@ -54,8 +62,6 @@ arg: ID COLON (INT | DOUBLE | STRING_TYPE);
 
 
 T_SKIP: 'skip';
-TRUE: 'true';
-FALSE: 'false';
 IF: 'if';
 THEN: 'then';
 ELSE: 'else';
@@ -67,7 +73,6 @@ INT: 'Int';
 DOUBLE: 'Double';
 STRING_TYPE: 'String';
 VOID: 'Void';
-ARRAY: 'array';
 NUMBER:         [1-9][0-9]* | [0];
 DECIMAL_NUMBER: [0-9]+ '.' [0-9]+ ;
 ID:             [a-z] ([a-zA-Z] | NUMBER | '_')*;
@@ -85,6 +90,8 @@ LESS_THAN_EQUAL: '<=';
 EQUAL_TO:       '==';
 NOT_EQUAL_TO:       '!=';
 EQUAL: '=';
+AND_OP: '&&';
+OR_OP: '||';
 L_CURLY_PAREN:   '{';
 R_CURLY_PAREN:   '}';
 L_SQUARE_PAREN:   '[';
