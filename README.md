@@ -1,11 +1,8 @@
 # A-FUN to WebAssembly
  A compiler from a statically typed language A-FUN to WebAssembly built in TypeScript.
 
-
-
-
 ## Installation instructions
-To install the software and use it in your local development environment, you must first set up a local development environment.  From the root of the project:
+To install the software and use it in your local development environment, you must first set up a local development environment. From the root of the project:
 
 Install WebAssembly Binary Toolkit (Ubuntu command - for other operating systems see [these instructions](https://github.com/WebAssembly/wabt))
 
