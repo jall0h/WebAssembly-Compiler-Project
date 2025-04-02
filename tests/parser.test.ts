@@ -1,8 +1,8 @@
 import { CharStream, CommonTokenStream, Token } from "antlr4"
 import GrammarLexer from "../src/antlr/generated/GrammarLexer"
 import GrammarParser from "../src/antlr/generated/GrammarParser"
-import { Tree } from "antlr4/src/antlr4/tree/Tree"
 import { ThrowErrorListener } from "../src/antlr/ErrorListener"
+import {describe, expect, test} from '@jest/globals';
 
 const parseProgram = (source: string) => {
     const characterSequence = new CharStream(source)

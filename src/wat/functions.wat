@@ -30,7 +30,7 @@
     return
 )
 
-(func (export "string_eq") (param $x_o i32) (param $x_l i32) (param $y_o i32) (param $y_l i32) (result i32)
+(func $string_eq (export "string_eq") (param $x_o i32) (param $x_l i32) (param $y_o i32) (param $y_l i32) (result i32)
     (local $i i32)
     local.get $x_l
     local.get $y_l
@@ -83,4 +83,12 @@
     )
 )
 
+(func (export "string_ne") (param $x_o i32) (param $x_l i32) (param $y_o i32) (param $y_l i32) (result i32)
+        local.get $x_o
+        local.get $x_l
+        local.get $y_o
+        local.get $y_l
+        call $string_eq
+        i32.eqz
+    )
 )

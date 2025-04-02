@@ -5,4 +5,6 @@ module.exports = {
     "^.+\.tsx?$": ["ts-jest",{}],
   },
   roots: ["./tests"],
+  modulePaths: ["../src"]
 };
+  

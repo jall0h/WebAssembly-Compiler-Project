@@ -6,5 +6,8 @@ def facT(n: Int, acc: Int) : Int =
 
 def facTi(n: Int) : Int = facT(n, 1);
 
-facT(100,1)
+{print_int(facT(30,1));
+print_string("\n");
+print_int(fact(30));
+print_string("\n")}
 

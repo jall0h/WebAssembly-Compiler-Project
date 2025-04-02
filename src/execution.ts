@@ -1,7 +1,7 @@
 import { CharStream, CommonTokenStream, Token } from "antlr4";
 import GrammarLexer from "./antlr/generated/GrammarLexer";
 import GrammarParser from "./antlr/generated/GrammarParser";
-import { Compiler } from "./compiler";
+import { Compiler } from "./codegen";
 import fs, { existsSync } from 'fs';
 import {exec} from 'child_process'
 import { promisify } from "util";
@@ -18,7 +18,7 @@ const file = args[2];
 
 
 
-const generateWATFile = (file: string) => {
+const generateWATFile = async (file: string) => {
     const fileContent:string  = fs.readFileSync(`./src/examples/${file}.fun`, 'utf-8')
     const input = new CharStream(fileContent)
     const lexer = new GrammarLexer (input)
@@ -40,8 +40,9 @@ const generateWATFile = (file: string) => {
     initialEnvironment.set("read", ["Int"])
     initialEnvironment.set("length",["Int", "String"])
     initialEnvironment.set("set_val_i32", ["Void", "Int[]", "Int", "Int"])
+    initialEnvironment.set("set_val_f32", ["Void", "Double[]", "Int", "Double"])
     const code = listener.compile(tree,initialEnvironment)
-    fs.writeFile(`./src/wat/${file}.wat`,code, (error) => {if (error){ console.log(error)}})
+    await fs.writeFile(`./src/wat/${file}.wat`,code, (error) => {if (error){ console.log(error)}})
 }
 
 

@@ -1,17 +1,15 @@
 // Generated from Grammar.g4 by ANTLR 4.13.2
 
 import {ParseTree, ParseTreeVisitor} from 'antlr4';
-
-
-import { AContext, ArgContext, Array_indexContext, ExpContext, TaContext } from "./GrammarParser.js";
-import { MContext } from "./GrammarParser.js";
-import { TContext } from "./GrammarParser.js";
-import { FContext } from "./GrammarParser.js";
-import { BexpContext } from "./GrammarParser.js";
-import { DefnContext } from "./GrammarParser.js";
-import { ProgContext } from "./GrammarParser.js";
-import { BlockContext } from "./GrammarParser.js";
-import { type_env } from '../../types.js';
+import { AContext, ArgContext, ExpContext, TaContext } from "./GrammarParser";
+import { MContext } from "./GrammarParser";
+import { TContext } from "./GrammarParser";
+import { FContext } from "./GrammarParser";
+import { BexpContext } from "./GrammarParser";
+import { DefnContext } from "./GrammarParser";
+import { ProgContext } from "./GrammarParser";
+import { BlockContext } from "./GrammarParser";
+import { type_env } from '../../types';
 
 
 
@@ -56,9 +54,6 @@ export default class GrammarVisitor<Result> extends ParseTreeVisitor<Result> {
 		}
 		if (tree instanceof ArgContext){
 			return this.visitArg(tree,ts)
-		}
-		if (tree instanceof Array_indexContext){
-			return this.visitArray_index(tree,ts)
 		}
 	}
 	/**
@@ -124,7 +119,6 @@ export default class GrammarVisitor<Result> extends ParseTreeVisitor<Result> {
 
 	visitArg?(ctx: ArgContext, ts?: type_env):Result;
 	
-	visitArray_index?(ctx: Array_indexContext, ts?: type_env):Result;
 
 
 }

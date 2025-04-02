@@ -3,18 +3,17 @@
 import {ParseTreeListener} from "antlr4";
 
 
-import { ExpContext } from "./GrammarParser.js";
-import { MContext } from "./GrammarParser.js";
-import { TContext } from "./GrammarParser.js";
-import { FContext } from "./GrammarParser.js";
-import { BexpContext } from "./GrammarParser.js";
-import { AContext } from "./GrammarParser.js";
-import { TaContext } from "./GrammarParser.js";
-import { DefnContext } from "./GrammarParser.js";
-import { Array_indexContext } from "./GrammarParser.js";
-import { ProgContext } from "./GrammarParser.js";
-import { BlockContext } from "./GrammarParser.js";
-import { ArgContext } from "./GrammarParser.js";
+import { ExpContext } from "./GrammarParser";
+import { MContext } from "./GrammarParser";
+import { TContext } from "./GrammarParser";
+import { FContext } from "./GrammarParser";
+import { BexpContext } from "./GrammarParser";
+import { AContext } from "./GrammarParser";
+import { TaContext } from "./GrammarParser";
+import { DefnContext } from "./GrammarParser";
+import { ProgContext } from "./GrammarParser";
+import { BlockContext } from "./GrammarParser";
+import { ArgContext } from "./GrammarParser";
 
 
 /**
@@ -102,16 +101,6 @@ export default class GrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitDefn?: (ctx: DefnContext) => void;
-	/**
-	 * Enter a parse tree produced by `GrammarParser.array_index`.
-	 * @param ctx the parse tree
-	 */
-	enterArray_index?: (ctx: Array_indexContext) => void;
-	/**
-	 * Exit a parse tree produced by `GrammarParser.array_index`.
-	 * @param ctx the parse tree
-	 */
-	exitArray_index?: (ctx: Array_indexContext) => void;
 	/**
 	 * Enter a parse tree produced by `GrammarParser.prog`.
 	 * @param ctx the parse tree
