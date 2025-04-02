@@ -17,8 +17,8 @@ const args = process.argv;
 const file = args[2];
 
 
-
-const generateWATFile = async (file: string) => {
+// Compile code to WebAssembly Text Format
+const compileWAT = async (file: string) => {
     const fileContent:string  = fs.readFileSync(`./src/examples/${file}.fun`, 'utf-8')
     const input = new CharStream(fileContent)
     const lexer = new GrammarLexer (input)
@@ -109,38 +109,51 @@ const execute = async (fileName: string, memory)  => {
     });
 }
 
+// Get WAT (text format) file and convert to WASM file (binary format)
+const generateWasm = async (file: string) => {
+  try{
+     console.log("Generating WAT");
+     await compileWAT(file);
+     if (!fs.existsSync(`./src/wat/${file}.wat`)){
+         throw new Error("WAT file not created")
+     }
+     const cmd: string = `wat2wasm ./src/wat/${file}.wat -o ./src/wasm/${file}.wasm`;
+     console.log("Executing WAT2WASM:", cmd);
+     await executeCommand(cmd);
+     if (!fs.existsSync(`./src/wasm/${file}.wasm`)){
+         throw new Error("WASM file not created")
+     }
+ }
+ catch (error){
+   console.log(error)
+ }
+ }
 
+// Execute Program with new memory import
 const run = async (fileName: string) => {
     const memory = new WebAssembly.Memory({ initial: 10, maximum: 65536 }); 
     await execute(fileName, memory)
 }
 
+// Runs program 10 times an gets average time
 const runTimed = async (fileName: string) => {
+  await compileWAT(fileName)
+  let total = 0;
+  for(let i = 0; i < 10; i++){
     const startTime = performance.now()
     await run(fileName)
     const endTime = performance.now()
-    console.log(`Time ${((endTime - startTime) / 1000).toExponential(3)}s`)
+    total += (endTime - startTime) / 1000
+  }
+  console.log(`Time ${(total / 10).toExponential(3)}s`)
 }
 
+// Runs program
 const runMain = async (file: string) => {
-    try{
-    console.log("Generating WAT");
-    await generateWATFile(file);
-    if (!fs.existsSync(`./src/wat/${file}.wat`)){
-        throw new Error("WAT file not created")
-    }
-    const cmd: string = `wat2wasm ./src/wat/${file}.wat -o ./src/wasm/${file}.wasm`;
-    console.log("Executing WAT2WASM:", cmd);
-    await executeCommand(cmd);
-    if (!fs.existsSync(`./src/wasm/${file}.wasm`)){
-        throw new Error("WASM file not created")
-    }
-    console.log("Running File");   
-    await run(file);
-    }
-    catch (error){
-        console.log(error)
-    }
+  await generateWasm(file)
+  console.log("Running File");   
+  await run(file);
+    
 }
 
-runMain(file)
+runTimed(file)
