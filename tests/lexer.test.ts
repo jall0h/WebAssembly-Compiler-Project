@@ -1,15 +1,14 @@
 import { CharStream, CommonTokenStream } from "antlr4";
 import GrammarLexer from "../src/antlr/generated/GrammarLexer";
+import { ThrowErrorListener } from "../src/antlr/ErrorListener";
+import { Compiler } from "../src/compiler";
 // import {describe, expect, test} from '@jest/globals';
 
 const lexProgram = (source: string) => {
-    const characterSequence = new CharStream(source)
-    const lexer = new GrammarLexer(characterSequence)
-    const tokens = new CommonTokenStream(lexer)
+    const compiler = new Compiler()
+    const lexer = compiler.lexProgram(source)
     return lexer.getAllTokens().map((t) => lexer.getSymbolicNames()[t.type])
 }
-
-
 
 
 describe('Lexer', () => {
@@ -36,6 +35,9 @@ describe('Lexer', () => {
       });
       test('Lexer ignores Whitespce', () => {
         expect(lexProgram("\n\n\n\n\t\t\t\t\t\r\r\n")).toStrictEqual([]);
+      });
+      test('Lexer throws error if unknown character', () => {
+        expect(() => lexProgram("##1[';@?")).toThrow();
       });
   });
 

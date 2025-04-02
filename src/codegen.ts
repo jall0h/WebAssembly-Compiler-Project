@@ -4,7 +4,7 @@ import { mem_val, type_env } from "./types";
 
 type Context = FContext | ExpContext | MContext | TContext | DefnContext | ArgContext
 
-export class Compiler extends GrammarVisitor<[string ,type_env]>{
+export class CodeGenerator extends GrammarVisitor<[string ,type_env]>{
     // Start of a program containing imports and array value assignments
     private code_start: string = `(module\n(import "process" "print_string" (func $print_string (param i32 i32)))
 (import "process" "print_int" (func $print_int (param i32)))
@@ -190,6 +190,7 @@ export class Compiler extends GrammarVisitor<[string ,type_env]>{
         if (ctx.a()){
             return this.visit_node(ctx.a(),ts)
         }
+        throw Error("Cannot Recognise Expression")
     }
 
     /**
@@ -206,6 +207,7 @@ export class Compiler extends GrammarVisitor<[string ,type_env]>{
         if (ctx.ta()){
             return this.visit_node(ctx.ta(),ts)
         }
+        throw Error("Cannot Recognise Expression")
     }
     /**
      * Visits an boolean node based in the abstract syntax tree and generates output depending on the expression based on the pareser grammar rule 'Ta'.

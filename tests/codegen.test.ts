@@ -2,42 +2,21 @@ import { CharStream, CommonTokenStream, Token } from "antlr4";
 import GrammarLexer from "../src/antlr/generated/GrammarLexer";
 import { ThrowErrorListener } from "../src/antlr/ErrorListener";
 import GrammarParser from "../src/antlr/generated/GrammarParser";
-import { Compiler } from "../src/codegen";
+import { CodeGenerator } from "../src/codegen";
 import { type_env } from "../src/types";
+import { Compiler } from "../src/compiler";
 
 
-const generateWATText = (program: string): string => {
-    const input = new CharStream(program)
-    const lexer = new GrammarLexer (input) 
-    const tokens = new CommonTokenStream(lexer)
-    const parser = new GrammarParser(tokens) 
+let compiler;
 
-    const tree = parser.prog()
-    const listener = new Compiler()
-    const initialEnvironment: type_env = new Map()
-
-    //Setup Initial Typing Environment
-    initialEnvironment.set("skip",["Void"])
-    initialEnvironment.set("print_string", ["Void", "String"])
-    initialEnvironment.set("print_int", ["Void", "Int"])
-    initialEnvironment.set("print_float", ["Void", "Double"])
-    initialEnvironment.set("print_char", ["Void", "Int"])
-    initialEnvironment.set("read", ["Int"])
-    initialEnvironment.set("length",["Int", "String"])
-    initialEnvironment.set("set_val_i32", ["Void", "Int[]", "Int", "Int"])
-    initialEnvironment.set("set_val_f32", ["Void", "Double[]", "Int", "Double"])
-    const code = listener.compile(tree,initialEnvironment)
-   return code
-}
+beforeEach(() => {
+   compiler = new Compiler()
+})
 
 
 describe('Code Generator', () => {
     test('Generates correct code', () => {
-      expect(generateWATText(`def hello(): String = "Hello World!\\n";
-
-def print_hello(x: String) : Void = print_string(x);
-
-print_string(hello())`)).toEqual(`(module
+      expect(compiler.generateWATString("hello")).toEqual(`(module
 (import "process" "print_string" (func $print_string (param i32 i32)))
 (import "process" "print_int" (func $print_int (param i32)))
 (import "process" "print_char" (func $print_char (param i32)))
@@ -66,7 +45,9 @@ i32.const 0
 return)
 )`);
     });
-  
+    test('Throws error for incorrect index', () => {
+      expect(() =>compiler.generateWATString("test_incorrect")).toThrow();
+    });
   });
 
 

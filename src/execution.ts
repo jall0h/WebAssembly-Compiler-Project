@@ -1,13 +1,17 @@
 import { CharStream, CommonTokenStream, Token } from "antlr4";
 import GrammarLexer from "./antlr/generated/GrammarLexer";
-import GrammarParser from "./antlr/generated/GrammarParser";
-import { Compiler } from "./codegen";
+import GrammarParser, { ProgContext } from "./antlr/generated/GrammarParser";
+import { CodeGenerator } from "./codegen";
 import fs, { existsSync } from 'fs';
 import {exec} from 'child_process'
 import { promisify } from "util";
 import { ThrowErrorListener } from "./antlr/ErrorListener";
 import { type_env } from "./types";
 import { error } from "console";
+import { Compiler } from "./compiler";
+
+
+
 
 const executeCommand = promisify(exec)
 const args = process.argv;
@@ -17,33 +21,8 @@ const args = process.argv;
 const file = args[2];
 
 
-// Compile code to WebAssembly Text Format
-const compileWAT = async (file: string) => {
-    const fileContent:string  = fs.readFileSync(`./src/examples/${file}.fun`, 'utf-8')
-    const input = new CharStream(fileContent)
-    const lexer = new GrammarLexer (input)
-    lexer.removeErrorListeners();
-    lexer.addErrorListener(new ThrowErrorListener<number>());
-    const tokens = new CommonTokenStream(lexer)
-    const parser = new GrammarParser(tokens)
-    parser.removeErrorListeners();
-    parser.addErrorListener(new ThrowErrorListener<Token>());
-    const tree = parser.prog()
-    const listener = new Compiler()
-    const initialEnvironment: type_env = new Map()
-    //Pre-existing functions
-    initialEnvironment.set("skip",["Void"])
-    initialEnvironment.set("print_string", ["Void", "String"])
-    initialEnvironment.set("print_int", ["Void", "Int"])
-    initialEnvironment.set("print_float", ["Void", "Double"])
-    initialEnvironment.set("print_char", ["Void", "Int"])
-    initialEnvironment.set("read", ["Int"])
-    initialEnvironment.set("length",["Int", "String"])
-    initialEnvironment.set("set_val_i32", ["Void", "Int[]", "Int", "Int"])
-    initialEnvironment.set("set_val_f32", ["Void", "Double[]", "Int", "Double"])
-    const code = listener.compile(tree,initialEnvironment)
-    await fs.writeFile(`./src/wat/${file}.wat`,code, (error) => {if (error){ console.log(error)}})
-}
+
+
 
 
 /**  
@@ -109,11 +88,13 @@ const execute = async (fileName: string, memory)  => {
     });
 }
 
+
 // Get WAT (text format) file and convert to WASM file (binary format)
 const generateWasm = async (file: string) => {
   try{
      console.log("Generating WAT");
-     await compileWAT(file);
+     const compiler = new Compiler()
+     await compiler.compile(file);
      if (!fs.existsSync(`./src/wat/${file}.wat`)){
          throw new Error("WAT file not created")
      }
@@ -137,7 +118,8 @@ const run = async (fileName: string) => {
 
 // Runs program 10 times an gets average time
 const runTimed = async (fileName: string) => {
-  await compileWAT(fileName)
+  const compiler = new Compiler()
+  await compiler.compile(fileName);
   let total = 0;
   for(let i = 0; i < 10; i++){
     const startTime = performance.now()
